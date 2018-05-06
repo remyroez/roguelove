@@ -8,10 +8,12 @@ lovetoys.initialize {
 local rot = require 'rot'
 
 require 'components.Displayable'
-require 'components.Position'
+require 'components.Map'
 require 'components.Player'
+require 'components.Position'
 
 local DisplaySystem = require 'systems.DisplaySystem'
+local MapSystem = require 'systems.MapSystem'
 local PlayerSystem = require 'systems.PlayerSystem'
 
 local KeyPressed = require 'events.KeyPressed'
@@ -19,6 +21,8 @@ local KeyPressed = require 'events.KeyPressed'
 local engine = nil
 
 function love.load()
+    love.keyboard.setKeyRepeat(true)
+
     engine = lovetoys.Engine()
 
     do
@@ -27,6 +31,8 @@ function love.load()
         engine:stopSystem(PlayerSystem.name)
         engine.eventManager:addListener(KeyPressed.name, system, system.keypressed)
     end
+
+    engine:addSystem(MapSystem())
     
     do
         local displaySystem = DisplaySystem(rot.Display())
@@ -47,26 +53,10 @@ function love.load()
     do
         local entity = lovetoys.Entity()
 
-        local Position, Displayable = lovetoys.Component.load { 'Position', 'Displayable' }
+        local Position, Displayable, Map = lovetoys.Component.load { 'Position', 'Displayable', 'Map' }
         entity:add(Position())
-
-        local map = rot.Map.Brogue(80, 24)
         entity:add(Displayable(DisplaySystem.static.layer.map, 80, 24))
-        local displayable = entity:get('Displayable')
-                
-        local function generateMap(x, y, value)
-            local symbol = nil
-            if value == 0 then
-                symbol = '.'
-            elseif value == 1 then
-                symbol = '#'
-            elseif value == 2 then
-                symbol = '+'
-            end
-            displayable:setSymbol(symbol, x, y)
-        end
-
-        map:create(generateMap)
+        entity:add(Map(rot.Map.Brogue(80, 24)))
 
         engine:addEntity(entity)
     end
