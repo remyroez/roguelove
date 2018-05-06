@@ -21,6 +21,11 @@ function Displayable:reset(layer, w, h)
     self.dirty = true
 end
 
+function Displayable:clear()
+    self.symbols = {}
+    self.dirty = true
+end
+
 function Displayable:validatePosition(x, y)
     local validate = false
 
