@@ -4,17 +4,20 @@ local lovetoys = require 'lovetoys.lovetoys'
 
 local MapSystem = class('MapSystem', lovetoys.System)
 
-local function BrogueMapGenerator(displayable)
+local function BrogueMapGenerator(displayable, collider)
     return function (x, y, value)
         local symbol = nil
+        local collision = false
         if value == 0 then
             symbol = '.'
         elseif value == 1 then
             symbol = '#'
+            collision = true
         elseif value == 2 then
             symbol = '+'
         end
         displayable:setSymbol(symbol, x, y)
+        collider:setCollision(collision, x, y)
     end
 end
 
@@ -23,7 +26,7 @@ function MapSystem:initialize()
 end
 
 function MapSystem:requires()
-    return { 'Map', 'Displayable' }
+    return { 'Map', 'Displayable', 'Collider' }
 end
 
 function MapSystem:update(dt)
@@ -34,7 +37,7 @@ function MapSystem:update(dt)
             local displayable = entity:get('Displayable')
             displayable:clear()
     
-            map:create(BrogueMapGenerator(displayable))
+            map:create(BrogueMapGenerator(displayable, entity:get('Collider')))
             map.dirty = false
         end
     end
