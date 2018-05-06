@@ -9,8 +9,12 @@ local rot = require 'rot'
 
 require 'components.Displayable'
 require 'components.Position'
+require 'components.Player'
 
 local DisplaySystem = require 'systems.DisplaySystem'
+local PlayerSystem = require 'systems.PlayerSystem'
+
+local KeyPressed = require 'events.KeyPressed'
 
 local engine = nil
 
@@ -18,18 +22,26 @@ function love.load()
     engine = lovetoys.Engine()
 
     do
+        local system = PlayerSystem()
+        engine:addSystem(system)
+        engine:stopSystem(PlayerSystem.name)
+        engine.eventManager:addListener(KeyPressed.name, system, system.keypressed)
+    end
+    
+    do
         local displaySystem = DisplaySystem(rot.Display())
         engine:addSystem(displaySystem, 'update')
         engine:addSystem(displaySystem, 'draw')
     end
-    
+
     do
-        local player = lovetoys.Entity()
-        local Position, Displayable = lovetoys.Component.load { 'Position', 'Displayable' }
-        player:add(Position(1, 1))
-        player:add(Displayable(DisplaySystem.static.layer.actor))
-        player:get('Displayable'):setSymbol('@')
-        engine:addEntity(player)
+        local entity = lovetoys.Entity()
+        local Position, Displayable, Player = lovetoys.Component.load { 'Position', 'Displayable', 'Player' }
+        entity:add(Position(1, 1))
+        entity:add(Displayable(DisplaySystem.static.layer.actor))
+        entity:get('Displayable'):setSymbol('@')
+        entity:add(Player())
+        engine:addEntity(entity)
     end
     
     do
@@ -66,4 +78,8 @@ end
 
 function love.draw()
     engine:draw()
+end
+
+function love.keypressed(key, scancode, isrepeat)
+    engine.eventManager:fireEvent(KeyPressed(key, scancode, isrepeat))
 end
