@@ -31,6 +31,33 @@ function love.load()
         player:get('Displayable'):setSymbol('@')
         engine:addEntity(player)
     end
+    
+    do
+        local entity = lovetoys.Entity()
+
+        local Position, Displayable = lovetoys.Component.load { 'Position', 'Displayable' }
+        entity:add(Position())
+
+        local map = rot.Map.Brogue(80, 24)
+        entity:add(Displayable(DisplaySystem.static.layer.map, 80, 24))
+        local displayable = entity:get('Displayable')
+                
+        local function generateMap(x, y, value)
+            local symbol = nil
+            if value == 0 then
+                symbol = '.'
+            elseif value == 1 then
+                symbol = '#'
+            elseif value == 2 then
+                symbol = '+'
+            end
+            displayable:setSymbol(symbol, x, y)
+        end
+
+        map:create(generateMap)
+
+        engine:addEntity(entity)
+    end
 end
 
 function love.update(dt)
