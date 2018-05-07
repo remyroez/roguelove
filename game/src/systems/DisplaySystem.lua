@@ -80,7 +80,7 @@ function DisplaySystem:write(map)
             for z = DisplaySystem.static.layer.first, DisplaySystem.static.layer.last do
                 local tile = util.getMap(map, x, y, DisplaySystem.static.layer.last - z + 1)
                 if tile ~= nil then
-                    self.display:write(tile, x, y)
+                    self.display:write(tile.symbol, x, y, tile.fgcolor, tile.bgcolor)
                     break
                 end
             end

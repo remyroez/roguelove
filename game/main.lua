@@ -61,7 +61,7 @@ function love.load()
         local Position, Displayable, Collider, Player = lovetoys.Component.load { 'Position', 'Displayable', 'Collider', 'Player' }
         entity:add(Position(10, 10))
         entity:add(Displayable(DisplaySystem.static.layer.actor, 2, 2))
-        entity:get('Displayable'):setSymbol('@')
+        entity:get('Displayable'):setSymbol({ symbol = '@', fgcolor = rot.Color.fromString('red') })
         entity:add(Collider(DisplaySystem.static.layer.actor, 2, 2))
         entity:get('Collider'):setCollision(true)
         entity:add(Player())

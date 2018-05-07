@@ -1,6 +1,7 @@
 
 local class = require 'middleclass'
 local lovetoys = require 'lovetoys.lovetoys'
+local rot = require 'rot'
 
 local MapSystem = class('MapSystem', lovetoys.System)
 
@@ -9,12 +10,14 @@ local function BrogueMapGenerator(displayable, collider)
         local symbol = nil
         local collision = false
         if value == 0 then
-            symbol = '.'
+            symbol = { symbol = '.', fgcolor = rot.Color.fromString('darkslategray') }
         elseif value == 1 then
-            symbol = '#'
+            symbol = { symbol = '#', fgcolor = rot.Color.fromString('lightslategray'), bgcolor = rot.Color.fromString('darkslategray') }
             collision = true
         elseif value == 2 then
-            symbol = '+'
+            symbol = { symbol = '+' }
+        else
+            symbol = { symbol = '?', bgcolor = rot.Color.fromString('red') }
         end
         displayable:setSymbol(symbol, x, y)
         collider:setCollision(collision, x, y)
