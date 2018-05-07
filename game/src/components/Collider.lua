@@ -1,4 +1,6 @@
 
+local util = require 'util'
+
 local lovetoys = require 'lovetoys.lovetoys'
 
 local Collider = lovetoys.Component.create('Collider')
@@ -50,10 +52,7 @@ function Collider:setCollision(collision, x, y)
     if not self:validatePosition(x, y) then
         -- error
     else
-        if self.collisions[x] == nil then
-            self.collisions[x] = {}
-        end
-        self.collisions[x][y] = collision
+        util.setMap(self.collisions, collision, x, y)
         self.dirty = true
     end
 end
@@ -63,10 +62,8 @@ function Collider:getCollision(x, y)
     y = y or 1
     if not self:validatePosition(x, y) then
         -- error
-    elseif self.collisions[x] == nil then
-        -- error
     else
-        return self.collisions[x][y]
+        return util.getMap(self.collisions, x, y)
     end
     return nil
 end

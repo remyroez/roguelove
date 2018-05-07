@@ -1,4 +1,6 @@
 
+local util = require 'util'
+
 local lovetoys = require 'lovetoys.lovetoys'
 
 local Displayable = lovetoys.Component.create('Displayable')
@@ -50,10 +52,7 @@ function Displayable:setSymbol(symbol, x, y)
     if not self:validatePosition(x, y) then
         -- error
     else
-        if self.symbols[x] == nil then
-            self.symbols[x] = {}
-        end
-        self.symbols[x][y] = symbol
+        util.setMap(self.symbols, symbol, x, y)
         self.dirty = true
     end
 end
@@ -63,10 +62,8 @@ function Displayable:getSymbol(x, y)
     y = y or 1
     if not self:validatePosition(x, y) then
         -- error
-    elseif self.symbols[x] == nil then
-        return nil
     else
-        return self.symbols[x][y]
+        return util.getMap(self.symbols, x, y)
     end
     return nil
 end

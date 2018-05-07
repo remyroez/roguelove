@@ -48,10 +48,10 @@ function DisplaySystem:updateMap(map)
             for y = 1, displayable.height do
                 util.setMap(
                     map,
+                    displayable:getSymbol(x, y),
                     x + position.x,
                     y + position.y,
-                    displayable.layer,
-                    displayable:getSymbol(x, y)
+                    displayable.layer
                 )
             end
         end
