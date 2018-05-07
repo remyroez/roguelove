@@ -33,7 +33,7 @@ function DisplaySystem:update(dt)
     if not self.dirty then
         -- not dirty
     else
-        self:flush(map)
+        self:write(map)
         self.dirty = false
     end
 end
@@ -55,28 +55,24 @@ function DisplaySystem:updateMap(map)
                 )
             end
         end
-        if not position.dirty then
+        if position.dirty['DisplaySystem'] == false then
             -- not dirty
         else
-            if not dirty then
-                dirty = position.dirty
-            end
-            position.dirty = false
+            dirty = true
+            position.dirty['DisplaySystem'] = false
         end
-        if not displayable.dirty then
+        if displayable.dirty['DisplaySystem'] == false then
             -- not dirty
         else
-            if not dirty then
-                dirty = displayable.dirty
-            end
-            displayable.dirty = false
+            dirty = true
+            displayable.dirty['DisplaySystem'] = false
         end
     end
 
     return dirty
 end
 
-function DisplaySystem:flush(map)
+function DisplaySystem:write(map)
     self.display:clear()
     local left, top, right, bottom = self:displayRect()
     for x = left, right do
@@ -90,6 +86,10 @@ function DisplaySystem:flush(map)
             end
         end
     end
+end
+
+function DisplaySystem:flush()
+    self.dirty = true
 end
 
 function DisplaySystem:draw()

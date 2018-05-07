@@ -17,5 +17,11 @@ function util.getMap(map, ...)
     return map[table.concat({...}, ',')]
 end
 
+function util.fill(t, v)
+    for k, _ in pairs(t) do
+        t[k] = v or true
+    end
+end
+
 
 return util
