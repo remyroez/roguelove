@@ -5,27 +5,27 @@ local rot = require 'rot'
 
 local MapSystem = class('MapSystem', lovetoys.System)
 
-local function BrogueMapGenerator(displayable, collider)
+local function BrogueMapGenerator(tileSet, entity)
     return function (x, y, value)
-        local symbol = nil
-        local collision = false
+        local tile = nil
         if value == 0 then
-            symbol = { symbol = '.', fgcolor = rot.Color.fromString('darkslategray') }
+            tile = tileSet:get('floor')
         elseif value == 1 then
-            symbol = { symbol = '#', fgcolor = rot.Color.fromString('lightslategray'), bgcolor = rot.Color.fromString('darkslategray') }
+            tile = tileSet:get('wall')
             collision = true
         elseif value == 2 then
-            symbol = { symbol = '+' }
+            tile = tileSet:get('door')
         else
-            symbol = { symbol = '?', bgcolor = rot.Color.fromString('red') }
+            tile = tileSet:get('error')
         end
-        displayable:setSymbol(symbol, x, y)
-        collider:setCollision(collision, x, y)
+        entity:get('Displayable'):setSymbol(tile.symbol, x, y)
+        entity:get('Collider'):setCollision(tile.collision, x, y)
     end
 end
 
-function MapSystem:initialize()
+function MapSystem:initialize(tileSet)
     lovetoys.System.initialize(self)
+    self.tileSet = tileSet
 end
 
 function MapSystem:requires()
@@ -33,14 +33,16 @@ function MapSystem:requires()
 end
 
 function MapSystem:update(dt)
+    if self.tileSet == nil then return end
+
     for index, entity in pairs(self.targets) do
         local map = entity:get('Map')
         
         if map.dirty then
-            local displayable = entity:get('Displayable')
-            displayable:clear()
+            entity:get('Displayable'):clear()
+            entity:get('Collider'):clear()
     
-            map:create(BrogueMapGenerator(displayable, entity:get('Collider')))
+            map:create(BrogueMapGenerator(self.tileSet, entity))
             map.dirty = false
         end
     end

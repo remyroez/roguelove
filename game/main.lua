@@ -21,10 +21,23 @@ local PlayerSystem = require 'systems.PlayerSystem'
 local KeyPressed = require 'events.KeyPressed'
 local Move = require 'events.Move'
 
+local TileSet = require 'core.TileSet'
+
 local engine = nil
+
+local context = {}
 
 function love.load()
     love.keyboard.setKeyRepeat(true)
+
+    local tileSet = TileSet {
+        player = { symbol = { character = 1, fgcolor = 'red' }, collision = true },
+        floor = { symbol = { character = '.', fgcolor = 'darkslategray' } },
+        wall = { symbol = { character = 177, fgcolor = 'lightslategray', bgcolor = 'darkslategray' }, collision = true },
+        door = { symbol = { character = '+', fgcolor = 'goldenrod' } },
+        error = { symbol = { character = '?', bgcolor = 'red' } },
+    }
+    context.tileSet = tileSet
 
     engine = lovetoys.Engine()
 
@@ -45,7 +58,7 @@ function love.load()
     end
 
     -- map system
-    engine:addSystem(MapSystem())
+    engine:addSystem(MapSystem(tileSet))
     
     -- display system
     do
@@ -60,11 +73,13 @@ function love.load()
 
         local Position, Displayable, Collider, Player = lovetoys.Component.load { 'Position', 'Displayable', 'Collider', 'Player' }
         entity:add(Position(10, 10))
-        entity:add(Displayable(DisplaySystem.static.layer.actor, 2, 2))
-        entity:get('Displayable'):setSymbol({ symbol = '@', fgcolor = rot.Color.fromString('red') })
-        entity:add(Collider(DisplaySystem.static.layer.actor, 2, 2))
-        entity:get('Collider'):setCollision(true)
+        entity:add(Displayable(DisplaySystem.static.layer.actor))
+        entity:add(Collider(DisplaySystem.static.layer.actor))
         entity:add(Player())
+
+        local tile = tileSet:get('player')
+        entity:get('Displayable'):setSymbol(tile.symbol)
+        entity:get('Collider'):setCollision(tile.collision)
 
         engine:addEntity(entity)
     end

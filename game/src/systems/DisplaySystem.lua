@@ -78,9 +78,9 @@ function DisplaySystem:write(map)
     for x = left, right do
         for y = top, bottom do
             for z = DisplaySystem.static.layer.first, DisplaySystem.static.layer.last do
-                local tile = util.getMap(map, x, y, DisplaySystem.static.layer.last - z + 1)
-                if tile ~= nil then
-                    self.display:write(tile.symbol, x, y, tile.fgcolor, tile.bgcolor)
+                local symbol = util.getMap(map, x, y, DisplaySystem.static.layer.last - z + 1)
+                if symbol ~= nil then
+                    self.display:write(symbol.character, x, y, symbol.fgcolor, symbol.bgcolor)
                     break
                 end
             end
