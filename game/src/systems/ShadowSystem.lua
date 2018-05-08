@@ -9,7 +9,6 @@ local ShadowSystem = class('ShadowSystem', lovetoys.System)
 function ShadowSystem:initialize()
     lovetoys.System.initialize(self)
     self.shadowMap = {}
-    self.dirty = true
 end
 
 function ShadowSystem:requires()
@@ -17,14 +16,12 @@ function ShadowSystem:requires()
 end
 
 function ShadowSystem:update(dt)
-    if self.dirty then
-        self:updateShadowMap()
-        self.dirty = false
-    end
+    self:updateShadowMap()
+    self.active = false
 end
 
 function ShadowSystem:flush()
-    self.dirty = true
+    self.active = true
 end
 
 function ShadowSystem:updateShadowMap()
