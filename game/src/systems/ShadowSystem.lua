@@ -61,7 +61,7 @@ function ShadowSystem:PreciseLightPassCallback()
             end
         end
         if not found then
-            through = false
+            --through = false
         end
         return through
     end
