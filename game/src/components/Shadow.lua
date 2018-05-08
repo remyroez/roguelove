@@ -27,28 +27,10 @@ function Shadow:clear()
     self.dirty = {}
 end
 
-function Shadow:validatePosition(x, y)
-    local validate = false
-
-    if x < 1 then
-        -- error
-    elseif x > self.width then
-        -- error
-    elseif y < 1 then
-        -- error
-    elseif y > self.height then
-        -- error
-    else
-        validate = true
-    end
-
-    return validate
-end
-
 function Shadow:setShade(value, x, y)
     x = x or 1
     y = y or 1
-    if not self:validatePosition(x, y) then
+    if not util.validatePosition(x, y, self.width, self.height) then
         -- error
     else
         util.setMap(self.map, value, x, y)
@@ -59,7 +41,7 @@ end
 function Shadow:getShade(x, y)
     x = x or 1
     y = y or 1
-    if not self:validatePosition(x, y) then
+    if not util.validatePosition(x, y, self.width, self.height) then
         -- error
     else
         return util.getMap(self.map, x, y)

@@ -23,5 +23,22 @@ function util.fill(t, v)
     end
 end
 
+function util.validatePosition(x, y, w, h)
+    local validate = false
+
+    if x < 1 then
+        -- error
+    elseif x > w then
+        -- error
+    elseif y < 1 then
+        -- error
+    elseif y > h then
+        -- error
+    else
+        validate = true
+    end
+
+    return validate
+end
 
 return util

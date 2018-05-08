@@ -23,28 +23,10 @@ function Collider:clear()
     self.dirty = {}
 end
 
-function Collider:validatePosition(x, y)
-    local validate = false
-
-    if x < 1 then
-        -- error
-    elseif x > self.width then
-        -- error
-    elseif y < 1 then
-        -- error
-    elseif y > self.height then
-        -- error
-    else
-        validate = true
-    end
-
-    return validate
-end
-
 function Collider:setCollision(collision, x, y)
     x = x or 1
     y = y or 1
-    if not self:validatePosition(x, y) then
+    if not util.validatePosition(x, y, self.width, self.height) then
         -- error
     else
         util.setMap(self.collisions, collision, x, y)
@@ -55,7 +37,7 @@ end
 function Collider:getCollision(x, y)
     x = x or 1
     y = y or 1
-    if not self:validatePosition(x, y) then
+    if not util.validatePosition(x, y, self.width, self.height) then
         -- error
     else
         return util.getMap(self.collisions, x, y)
