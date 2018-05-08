@@ -45,11 +45,23 @@ end
 function ShadowSystem:PreciseLightPassCallback()
     return function (fov, x, y)
         local through = true
+        local found = false
+        local shade = false
         for layer = const.layer.first, const.layer.last do
-            if util.getMap(self.shadowMap, x, y, layer) then
-                through = false
-                break
+            shade = util.getMap(self.shadowMap, x, y, layer)
+            if shade == nil then
+                -- nil
+            else
+                found = true
+                if shade then
+                    through = false
+                    found = true
+                    break
+                end
             end
+        end
+        if not found then
+            through = false
         end
         return through
     end
