@@ -1,4 +1,6 @@
 
+local util = require 'util'
+
 local class = require 'middleclass'
 local lovetoys = require 'lovetoys.lovetoys'
 
@@ -16,7 +18,7 @@ end
 
 function ShadowSystem:update(dt)
     if self.dirty then
-        updateShadowMap()
+        self:updateShadowMap()
         self.dirty = false
     end
 end
