@@ -43,14 +43,14 @@ end
 
 function ShadowSystem:PreciseLightPassCallback()
     return function (fov, x, y)
-        local shade = false
+        local through = true
         for layer = 1, 3 do
             if util.getMap(self.shadowMap, x, y, layer) then
-                shade = true
+                through = false
                 break
             end
         end
-        return shade
+        return through
     end
 end
 
