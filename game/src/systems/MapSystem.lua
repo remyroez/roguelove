@@ -12,7 +12,6 @@ local function BrogueMapGenerator(tileSet, entity)
             tile = tileSet:get('floor')
         elseif value == 1 then
             tile = tileSet:get('wall')
-            collision = true
         elseif value == 2 then
             tile = tileSet:get('door')
         else
@@ -20,6 +19,7 @@ local function BrogueMapGenerator(tileSet, entity)
         end
         entity:get('Displayable'):setSymbol(tile.symbol, x, y)
         entity:get('Collider'):setCollision(tile.collision, x, y)
+        entity:get('Shadow'):setShade(tile.shade, x, y)
     end
 end
 
@@ -29,7 +29,7 @@ function MapSystem:initialize(tileSet)
 end
 
 function MapSystem:requires()
-    return { 'Map', 'Displayable', 'Collider' }
+    return { 'Map', 'Displayable', 'Collider', 'Shadow' }
 end
 
 function MapSystem:update(dt)
@@ -41,6 +41,7 @@ function MapSystem:update(dt)
         if map.dirty then
             entity:get('Displayable'):clear()
             entity:get('Collider'):clear()
+            entity:get('Shadow'):clear()
     
             map:create(BrogueMapGenerator(self.tileSet, entity))
             map.dirty = false
