@@ -28,7 +28,7 @@ function ViewSystem:update(dt)
         --dirty = position.dirty[ViewSystem.name] or view.dirty[ViewSystem.name]
         
         if dirty then
-            view:compute(position.x, position.y)
+            view:compute(position.x + 1, position.y + 1)
             position.dirty[ViewSystem.name] = false
             view.dirty[ViewSystem.name] = false
         end
