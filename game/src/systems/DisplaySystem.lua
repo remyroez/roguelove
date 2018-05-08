@@ -3,6 +3,7 @@ local util = require 'util'
 
 local class = require 'middleclass'
 local lovetoys = require 'lovetoys.lovetoys'
+local rot = require 'rot'
 
 local DisplaySystem = class('DisplaySystem', lovetoys.System)
 
@@ -15,11 +16,13 @@ DisplaySystem.static.layer = {
 DisplaySystem.static.layer.first = DisplaySystem.static.layer.map
 DisplaySystem.static.layer.last = DisplaySystem.static.layer.actor
 
-function DisplaySystem:initialize(display)
+function DisplaySystem:initialize(engine, display)
     lovetoys.System.initialize(self)
 
-    self.dirty = false
+    self.engine = engine
     self.display = display
+
+    self.dirty = false
 end
 
 function DisplaySystem:requires()
@@ -27,18 +30,21 @@ function DisplaySystem:requires()
 end
 
 function DisplaySystem:update(dt)
-    local map = {}
-    self.dirty = self:updateMap(map) or self.dirty
+    local symbolMap = {}
+    local visionMap = {}
+    local seenMap = {}
+    self.dirty = self:updateViewMap(visionMap, seenMap) or self.dirty
+    self.dirty = self:updateSymbolMap(symbolMap, visionMap, seenMap) or self.dirty
 
     if not self.dirty then
         -- not dirty
     else
-        self:write(map)
+        self:write(symbolMap, seenMap)
         self.dirty = false
     end
 end
 
-function DisplaySystem:updateMap(map)
+function DisplaySystem:updateSymbolMap(map, visionMap, seenMap)
     local dirty = false
 
     for index, entity in pairs(self.targets) do
@@ -46,13 +52,29 @@ function DisplaySystem:updateMap(map)
         local displayable = entity:get('Displayable')
         for x = 1, displayable.width do
             for y = 1, displayable.height do
-                util.setMap(
-                    map,
-                    displayable:getSymbol(x, y),
-                    x + position.x,
-                    y + position.y,
-                    displayable.layer
-                )
+                local left = x + position.x
+                local top = y + position.y
+                local visible = util.getMap(seenMap, left, top)
+                if not visible then
+                    -- skip
+                else
+                    local symbol = displayable:getSymbol(x, y)
+                    local vision = util.getMap(visionMap, left, top)
+                    if vision then
+                        local newSymbol = {}
+                        newSymbol.character = symbol.character
+                        if symbol.fgcolor then newSymbol.fgcolor = rot.Color.interpolate(symbol.fgcolor, rot.Color.fromString('goldenrod'), vision * .5) end
+                        if symbol.bgcolor then newSymbol.bgcolor = rot.Color.interpolate(symbol.bgcolor, rot.Color.fromString('goldenrod'), vision * .5) end
+                        symbol = newSymbol
+                    end
+                    util.setMap(
+                        map,
+                        symbol,
+                        left,
+                        top,
+                        displayable.layer
+                    )
+                end
             end
         end
         if position.dirty['DisplaySystem'] == false then
@@ -66,6 +88,30 @@ function DisplaySystem:updateMap(map)
         else
             dirty = true
             displayable.dirty['DisplaySystem'] = false
+        end
+    end
+
+    return dirty
+end
+
+function DisplaySystem:updateViewMap(visionMap, seenMap)
+    local dirty = false
+
+    for index, entity in pairs(self.engine:getEntitiesWithComponent('View')) do
+        local view = entity:get('View')
+
+        for key, value in pairs(view.visionMap) do
+            visionMap[key] = (visionMap[key] == nil) and value or math.max(visionMap[key], value)
+        end
+        for key, value in pairs(view.seenMap) do
+            seenMap[key] = (seenMap[key] == nil) and value or math.max(seenMap[key], value)
+        end
+
+        if view.dirty['DisplaySystem'] == false then
+            -- not dirty
+        else
+            dirty = true
+            view.dirty['DisplaySystem'] = false
         end
     end
 
