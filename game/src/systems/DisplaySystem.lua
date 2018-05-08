@@ -1,4 +1,5 @@
 
+local const = require 'const'
 local util = require 'util'
 
 local class = require 'middleclass'
@@ -6,15 +7,6 @@ local lovetoys = require 'lovetoys.lovetoys'
 local rot = require 'rot'
 
 local DisplaySystem = class('DisplaySystem', lovetoys.System)
-
-DisplaySystem.static.layer = {
-    map = 1,
-    item = 2,
-    actor = 3
-}
-
-DisplaySystem.static.layer.first = DisplaySystem.static.layer.map
-DisplaySystem.static.layer.last = DisplaySystem.static.layer.actor
 
 function DisplaySystem:initialize(engine, display)
     lovetoys.System.initialize(self)
@@ -123,8 +115,8 @@ function DisplaySystem:write(map)
     local left, top, right, bottom = self:displayRect()
     for x = left, right do
         for y = top, bottom do
-            for z = DisplaySystem.static.layer.first, DisplaySystem.static.layer.last do
-                local symbol = util.getMap(map, x, y, DisplaySystem.static.layer.last - z + 1)
+            for z = const.layer.first, const.layer.last do
+                local symbol = util.getMap(map, x, y, const.layer.last - z + 1)
                 if symbol ~= nil then
                     self.display:write(symbol.character, x, y, symbol.fgcolor, symbol.bgcolor)
                     break

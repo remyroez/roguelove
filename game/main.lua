@@ -1,4 +1,6 @@
 
+local const = require 'const'
+
 local lovetoys = require 'lovetoys.lovetoys'
 lovetoys.initialize {
     debug = true,
@@ -97,9 +99,9 @@ function love.load()
         }
         entity:add(Player())
         entity:add(Position(10, 10))
-        entity:add(Displayable(DisplaySystem.static.layer.actor))
-        entity:add(Collider(DisplaySystem.static.layer.actor))
-        entity:add(Shadow(DisplaySystem.static.layer.actor))
+        entity:add(Displayable(const.layer.actor))
+        entity:add(Collider(const.layer.actor))
+        entity:add(Shadow(const.layer.actor))
         entity:add(View(rot.FOV.Precise:new(shadowSystem:PreciseLightPassCallback())))
 
         local tile = tileSet:get('player')
@@ -121,9 +123,9 @@ function love.load()
         local h = 24
         entity:add(Map(rot.Map.Brogue(w, h)))
         entity:add(Position())
-        entity:add(Displayable(DisplaySystem.static.layer.map, w, h))
-        entity:add(Collider(DisplaySystem.static.layer.map, w, h))
-        entity:add(Shadow(DisplaySystem.static.layer.map, w, h))
+        entity:add(Displayable(const.layer.map, w, h))
+        entity:add(Collider(const.layer.map, w, h))
+        entity:add(Shadow(const.layer.map, w, h))
 
         engine:addEntity(entity)
     end

@@ -1,4 +1,5 @@
 
+local const = require 'const'
 local util = require 'util'
 
 local class = require 'middleclass'
@@ -44,7 +45,7 @@ end
 function ShadowSystem:PreciseLightPassCallback()
     return function (fov, x, y)
         local through = true
-        for layer = 1, 3 do
+        for layer = const.layer.first, const.layer.last do
             if util.getMap(self.shadowMap, x, y, layer) then
                 through = false
                 break
