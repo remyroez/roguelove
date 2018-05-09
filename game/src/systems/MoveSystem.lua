@@ -2,6 +2,8 @@
 local class = require 'middleclass'
 local lovetoys = require 'lovetoys.lovetoys'
 
+local Flush = require 'events.Flush'
+
 local MoveSystem = class('MoveSystem', lovetoys.System)
 
 local function isHit(srcPosition, srcCollider, distX, distY, distCollider)
@@ -55,8 +57,9 @@ local function isHit(srcPosition, srcCollider, distX, distY, distCollider)
     return hit
 end
 
-function MoveSystem:initialize()
+function MoveSystem:initialize(eventManager)
     lovetoys.System.initialize(self)
+    self.eventManager = eventManager
 end
 
 function MoveSystem:requires()
@@ -90,6 +93,10 @@ function MoveSystem:onMove(event)
         -- can't move
     else
         event.position:translate(event.x, event.y)
+        
+        if self.eventManager then
+            self.eventManager:fireEvent(Flush())
+        end
     end
 end
 
