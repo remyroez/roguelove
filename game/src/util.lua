@@ -1,4 +1,6 @@
 
+local lume = require 'lume'
+
 local util = {}
 
 function util.setMap(map, value, ...)
@@ -15,6 +17,10 @@ function util.getMap(map, ...)
         return
     end
     return map[table.concat({...}, ',')]
+end
+
+function util.splitKey(key)
+    return unpack(lume.split(key, ','))
 end
 
 function util.fill(t, v)
