@@ -62,7 +62,9 @@ function DisplaySystem:updateSymbolMap(map, visionMap, seenMap)
                     if vision then
                         if symbol.fgcolor then
                             newSymbol.fgcolor = rot.Color.interpolateHSL(symbol.fgcolor, rot.Color.fromString('black'), (1 - vision) * .5)
-                            if light then
+                            if displayable.layer ~= const.layer.map then
+                                -- skip light
+                            elseif light then
                                 newSymbol.fgcolor = rot.Color.add(newSymbol.fgcolor, light)
                             end
                         end
