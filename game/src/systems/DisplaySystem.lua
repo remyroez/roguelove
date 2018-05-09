@@ -52,13 +52,24 @@ function DisplaySystem:updateSymbolMap(map, visionMap, seenMap)
                 else
                     local symbol = displayable:getSymbol(x, y)
                     local vision = util.getMap(visionMap, left, top)
+                    local newSymbol = {}
+                    newSymbol.character = symbol.character
                     if vision then
-                        local newSymbol = {}
-                        newSymbol.character = symbol.character
-                        if symbol.fgcolor then newSymbol.fgcolor = rot.Color.interpolate(symbol.fgcolor, rot.Color.fromString('goldenrod'), vision * .5) end
-                        if symbol.bgcolor then newSymbol.bgcolor = rot.Color.interpolate(symbol.bgcolor, rot.Color.fromString('goldenrod'), vision * .5) end
-                        symbol = newSymbol
+                        if symbol.fgcolor then
+                            newSymbol.fgcolor = rot.Color.interpolate(symbol.fgcolor, rot.Color.fromString('black'), (1 - vision) * .5)
+                        end
+                        if symbol.bgcolor then
+                            newSymbol.bgcolor = rot.Color.interpolate(symbol.bgcolor, rot.Color.fromString('black'), (1 - vision) * .5)
+                        end
+                    else
+                        if symbol.fgcolor then
+                            newSymbol.fgcolor = rot.Color.interpolate(symbol.fgcolor, rot.Color.fromString('black'), .5)
+                        end
+                        if symbol.bgcolor then
+                            newSymbol.bgcolor = rot.Color.interpolate(symbol.bgcolor, rot.Color.fromString('black'), .5)
+                        end
                     end
+                    symbol = newSymbol
                     util.setMap(
                         map,
                         symbol,
@@ -115,13 +126,19 @@ function DisplaySystem:write(map)
     local left, top, right, bottom = self:displayRect()
     for x = left, right do
         for y = top, bottom do
+            local character = nil
+            local fgcolor = nil
+            local bgcolor = nil
             for z = const.layer.first, const.layer.last do
-                local symbol = util.getMap(map, x, y, const.layer.last - z + 1)
+                local symbol = util.getMap(map, x, y, z)
                 if symbol ~= nil then
-                    self.display:write(symbol.character, x, y, symbol.fgcolor, symbol.bgcolor)
-                    break
+                    character = symbol.character or character
+                    fgcolor = symbol.fgcolor or fgcolor
+                    bgcolor = symbol.bgcolor or bgcolor
                 end
             end
+            if character == nil then character = '' end
+            self.display:write(character, x, y, fgcolor, bgcolor)
         end
     end
 end
