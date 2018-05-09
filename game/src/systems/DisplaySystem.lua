@@ -6,6 +6,8 @@ local class = require 'middleclass'
 local lovetoys = require 'lovetoys.lovetoys'
 local rot = require 'rot'
 
+local Collection = require 'events.Collection'
+
 local DisplaySystem = class('DisplaySystem', lovetoys.System)
 
 function DisplaySystem:initialize(engine, display)
@@ -31,13 +33,15 @@ function DisplaySystem:update(dt)
     if not self.dirty then
         -- not dirty
     else
-        self:write(symbolMap, seenMap)
+        self:write(symbolMap)
         self.dirty = false
     end
 end
 
 function DisplaySystem:updateSymbolMap(map, visionMap, seenMap)
     local dirty = false
+
+    local lightMap = self:getLightMap()
 
     for index, entity in pairs(self.targets) do
         local position = entity:get('Position')
@@ -52,18 +56,26 @@ function DisplaySystem:updateSymbolMap(map, visionMap, seenMap)
                 else
                     local symbol = displayable:getSymbol(x, y)
                     local vision = util.getMap(visionMap, left, top)
+                    local light = util.getMap(lightMap, left, top)
                     local newSymbol = {}
                     newSymbol.character = symbol.character
                     if vision then
                         if symbol.fgcolor then
-                            newSymbol.fgcolor = rot.Color.interpolate(symbol.fgcolor, rot.Color.fromString('black'), (1 - vision) * .5)
+                            newSymbol.fgcolor = rot.Color.interpolateHSL(symbol.fgcolor, rot.Color.fromString('black'), (1 - vision) * .5)
+                            if light then
+                                newSymbol.fgcolor = rot.Color.add(newSymbol.fgcolor, light)
+                            end
                         end
                         if symbol.bgcolor then
                             newSymbol.bgcolor = rot.Color.interpolate(symbol.bgcolor, rot.Color.fromString('black'), (1 - vision) * .5)
+                            if light then
+                                newSymbol.bgcolor = rot.Color.add(newSymbol.bgcolor, light)
+                            end
                         end
                     else
                         if symbol.fgcolor then
-                            newSymbol.fgcolor = rot.Color.interpolate(symbol.fgcolor, rot.Color.fromString('black'), .5)
+                            newSymbol.fgcolor = rot.Color.interpolateHSL(symbol.fgcolor, rot.Color.fromString('black'), .5)
+
                         end
                         if symbol.bgcolor then
                             newSymbol.bgcolor = rot.Color.interpolate(symbol.bgcolor, rot.Color.fromString('black'), .5)
@@ -119,6 +131,12 @@ function DisplaySystem:updateViewMap(visionMap, seenMap)
     end
 
     return dirty
+end
+
+function DisplaySystem:getLightMap()
+    local event = Collection('lightMap')
+    self.engine.eventManager:fireEvent(event)
+    return event.result[1] or {}
 end
 
 function DisplaySystem:write(map)

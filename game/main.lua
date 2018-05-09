@@ -11,6 +11,7 @@ local rot = require 'rot'
 
 require 'components.Collider'
 require 'components.Displayable'
+require 'components.Light'
 require 'components.Map'
 require 'components.Player'
 require 'components.Position'
@@ -18,12 +19,14 @@ require 'components.Shadow'
 require 'components.View'
 
 local DisplaySystem = require 'systems.DisplaySystem'
+local LightSystem = require 'systems.LightSystem'
 local MapSystem = require 'systems.MapSystem'
 local MoveSystem = require 'systems.MoveSystem'
 local PlayerSystem = require 'systems.PlayerSystem'
 local ShadowSystem = require 'systems.ShadowSystem'
 local ViewSystem = require 'systems.ViewSystem'
 
+local Collection = require 'events.Collection'
 local Flush = require 'events.Flush'
 local KeyPressed = require 'events.KeyPressed'
 local Move = require 'events.Move'
@@ -76,6 +79,17 @@ function love.load()
         shadowSystem = system
     end
 
+    -- light system
+    do
+        local system = LightSystem(
+            rot.FOV.Precise:new(shadowSystem:PreciseLightPassCallback()),
+            shadowSystem:PreciseLightPassCallback()
+        )
+        engine:addSystem(system)
+        engine.eventManager:addListener(Flush.name, system, system.flush)
+        engine.eventManager:addListener(Collection.name, system, system.onCollection)
+    end
+
     -- view system
     do
         local system = ViewSystem()
@@ -94,20 +108,22 @@ function love.load()
     do
         local entity = lovetoys.Entity()
 
-        local Player, Position, Displayable, Collider, Shadow, View = lovetoys.Component.load {
-            'Player', 'Position', 'Displayable', 'Collider', 'Shadow', 'View'
+        local Player, Position, Displayable, Collider, Shadow, Light, View = lovetoys.Component.load {
+            'Player', 'Position', 'Displayable', 'Collider', 'Shadow', 'Light', 'View'
         }
         entity:add(Player())
         entity:add(Position(10, 10))
         entity:add(Displayable(const.layer.actor))
         entity:add(Collider(const.layer.actor))
         entity:add(Shadow(const.layer.actor))
-        entity:add(View(rot.FOV.Precise:new(shadowSystem:PreciseLightPassCallback())))
+        entity:add(Light(const.layer.actor))
+        entity:add(View(rot.FOV.Precise:new(shadowSystem:PreciseLightPassCallback()), 10))
 
         local tile = tileSet:get('player')
         entity:get('Displayable'):setSymbol(tile.symbol)
         entity:get('Collider'):setCollision(tile.collision)
         entity:get('Shadow'):setShade(tile.shade)
+        entity:get('Light'):setColor(rot.Color.fromString('goldenrod'))
 
         engine:addEntity(entity)
     end
@@ -116,8 +132,8 @@ function love.load()
     do
         local entity = lovetoys.Entity()
 
-        local Map, Position, Displayable, Collider, Shadow = lovetoys.Component.load {
-            'Map', 'Position', 'Displayable', 'Collider', 'Shadow', 
+        local Map, Position, Displayable, Collider, Shadow, Light = lovetoys.Component.load {
+            'Map', 'Position', 'Displayable', 'Collider', 'Shadow', 'Light'
         }
         local w = 80
         local h = 24
@@ -126,6 +142,11 @@ function love.load()
         entity:add(Displayable(const.layer.map, w, h))
         entity:add(Collider(const.layer.map, w, h))
         entity:add(Shadow(const.layer.map, w, h))
+        entity:add(Light(const.layer.map, w, h))
+        
+        entity:get('Light'):setColor(rot.Color.fromString('red'), 40, 15)
+        entity:get('Light'):setColor(rot.Color.fromString('green'), 10, 15)
+        entity:get('Light'):setColor(rot.Color.fromString('blue'), 70, 15)
 
         engine:addEntity(entity)
     end
