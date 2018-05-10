@@ -5,16 +5,14 @@ local lovetoys = require 'lovetoys.lovetoys'
 
 local Collider = lovetoys.Component.create('Collider')
 
-function Collider:initialize(w, h)
+function Collider:initialize()
     self:clear()
-    self:reset(w, h)
+    self:reset()
 end
 
-function Collider:reset(w, h)
-    self.width = w or 1
-    self.height = h or 1
-    self.collisions = {}
-    util.fill(self.dirty)
+function Collider:reset()
+    self.map = {}
+    self:flush()
 end
 
 function Collider:flush()
@@ -22,30 +20,21 @@ function Collider:flush()
 end
 
 function Collider:clear()
-    self.collisions = {}
+    self.map = {}
     self.dirty = {}
 end
 
-function Collider:setCollision(collision, x, y)
+function Collider:setCollision(value, x, y)
     x = x or 1
     y = y or 1
-    if not util.validatePosition(x, y, self.width, self.height) then
-        -- error
-    else
-        util.setMap(self.collisions, collision, x, y)
-        util.fill(self.dirty)
-    end
+    util.setMap(self.map, value, x, y)
+    util.fill(self.dirty)
 end
 
 function Collider:getCollision(x, y)
     x = x or 1
     y = y or 1
-    if not util.validatePosition(x, y, self.width, self.height) then
-        -- error
-    else
-        return util.getMap(self.collisions, x, y)
-    end
-    return nil
+    return util.getMap(self.map, x, y)
 end
 
 return Collider

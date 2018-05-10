@@ -5,14 +5,12 @@ local lovetoys = require 'lovetoys.lovetoys'
 
 local Light = lovetoys.Component.create('Light')
 
-function Light:initialize(w, h)
+function Light:initialize()
     self:clear()
-    self:reset(w, h)
+    self:reset()
 end
 
-function Light:reset(w, h)
-    self.width = w or 1
-    self.height = h or 1
+function Light:reset()
     self.map = {}
     self:flush()
 end
@@ -29,23 +27,14 @@ end
 function Light:setColor(value, x, y)
     x = x or 1
     y = y or 1
-    if not util.validatePosition(x, y, self.width, self.height) then
-        -- error
-    else
-        util.setMap(self.map, value, x, y)
-        util.fill(self.dirty)
-    end
+    util.setMap(self.map, value, x, y)
+    util.fill(self.dirty)
 end
 
 function Light:getColor(x, y)
     x = x or 1
     y = y or 1
-    if not util.validatePosition(x, y, self.width, self.height) then
-        -- error
-    else
-        return util.getMap(self.map, x, y)
-    end
-    return nil
+    return util.getMap(self.map, x, y)
 end
 
 return Light

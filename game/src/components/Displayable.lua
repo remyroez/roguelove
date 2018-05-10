@@ -5,16 +5,14 @@ local lovetoys = require 'lovetoys.lovetoys'
 
 local Displayable = lovetoys.Component.create('Displayable')
 
-function Displayable:initialize(w, h)
+function Displayable:initialize()
     self:clear()
-    self:reset(w, h)
+    self:reset()
 end
 
-function Displayable:reset(w, h)
-    self.width = w or 1
-    self.height = h or 1
-    self.symbols = {}
-    util.fill(self.dirty)
+function Displayable:reset()
+    self.map = {}
+    self:flush()
 end
 
 function Displayable:flush()
@@ -22,30 +20,21 @@ function Displayable:flush()
 end
 
 function Displayable:clear()
-    self.symbols = {}
+    self.map = {}
     self.dirty = {}
 end
 
-function Displayable:setSymbol(symbol, x, y)
+function Displayable:setSymbol(value, x, y)
     x = x or 1
     y = y or 1
-    if not util.validatePosition(x, y, self.width, self.height) then
-        -- error
-    else
-        util.setMap(self.symbols, symbol, x, y)
-        util.fill(self.dirty)
-    end
+    util.setMap(self.map, value, x, y)
+    util.fill(self.dirty)
 end
 
 function Displayable:getSymbol(x, y)
     x = x or 1
     y = y or 1
-    if not util.validatePosition(x, y, self.width, self.height) then
-        -- error
-    else
-        return util.getMap(self.symbols, x, y)
-    end
-    return nil
+    return util.getMap(self.map, x, y)
 end
 
 return Displayable

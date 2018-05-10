@@ -20,4 +20,8 @@ function Component:reset(w, h)
     self:flush()
 end
 
+function Component:validatePosition(x, y)
+    return util.validatePosition(x, y, self.width, self.height)
+end
+
 return Component
