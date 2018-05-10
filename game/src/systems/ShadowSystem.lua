@@ -13,7 +13,7 @@ function ShadowSystem:initialize()
 end
 
 function ShadowSystem:requires()
-    return { 'Position', 'Layer', 'Shadow' }
+    return { 'Position', 'Size', 'Layer', 'Shadow' }
 end
 
 function ShadowSystem:update(dt)
@@ -30,11 +30,12 @@ function ShadowSystem:updateShadowMap()
 
     for index, entity in pairs(self.targets) do
         local position = entity:get('Position')
-        local shadow = entity:get('Shadow')
+        local size = entity:get('Size')
         local layer = entity:get('Layer')
+        local shadow = entity:get('Shadow')
         
-        for x = 1, shadow.width do
-            for y = 1, shadow.height do
+        for x = 1, size.width do
+            for y = 1, size.height do
                 local left = x + position.x
                 local top = y + position.y
                 util.setMap(self.shadowMap, shadow:getShade(left, top), left, top, layer:priority())

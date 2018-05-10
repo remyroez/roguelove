@@ -20,7 +20,7 @@ function DisplaySystem:initialize(engine, display)
 end
 
 function DisplaySystem:requires()
-    return { 'Position', 'Layer', 'Displayable' }
+    return { 'Position', 'Size', 'Layer', 'Displayable' }
 end
 
 function DisplaySystem:update(dt)
@@ -45,10 +45,11 @@ function DisplaySystem:updateSymbolMap(map, visionMap, seenMap)
 
     for index, entity in pairs(self.targets) do
         local position = entity:get('Position')
-        local displayable = entity:get('Displayable')
+        local size = entity:get('Size')
         local layer = entity:get('Layer')
-        for x = 1, displayable.width do
-            for y = 1, displayable.height do
+        local displayable = entity:get('Displayable')
+        for x = 1, size.width do
+            for y = 1, size.height do
                 local left = x + position.x
                 local top = y + position.y
                 local visible = util.getMap(seenMap, left, top)
