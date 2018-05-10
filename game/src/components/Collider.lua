@@ -5,16 +5,19 @@ local lovetoys = require 'lovetoys.lovetoys'
 
 local Collider = lovetoys.Component.create('Collider')
 
-function Collider:initialize(layer, w, h)
+function Collider:initialize(w, h)
     self:clear()
-    self:reset(layer, w, h)
+    self:reset(w, h)
 end
 
-function Collider:reset(layer, w, h)
+function Collider:reset(w, h)
     self.width = w or 1
     self.height = h or 1
-    self.layer = layer or 1
     self.collisions = {}
+    util.fill(self.dirty)
+end
+
+function Collider:flush()
     util.fill(self.dirty)
 end
 
