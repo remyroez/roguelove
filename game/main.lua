@@ -32,6 +32,7 @@ local KeyPressed = require 'events.KeyPressed'
 local Move = require 'events.Move'
 
 local TileSet = require 'core.TileSet'
+local Terminal = require 'core.Terminal'
 
 local engine = nil
 
@@ -41,11 +42,18 @@ function love.load()
     love.keyboard.setKeyRepeat(true)
 
     local tileSet = TileSet {
-        player = { symbol = { character = 1, fgcolor = 'red' }, collision = true, shade = true },
-        floor = { symbol = { character = '.', fgcolor = 'darkslategray' } },
-        wall = { symbol = { character = 177, fgcolor = 'lightslategray', bgcolor = 'darkslategray' }, collision = true, shade = true },
-        door = { symbol = { character = '+', fgcolor = 'goldenrod' }, shade = true },
-        error = { symbol = { character = '?', bgcolor = 'red' } },
+        glyph = {
+            sprite = love.graphics.newImage('assets/tileset/16x16_sm_ascii.png'),
+            width = 16,
+            height = 16,
+        },
+        tiles = {
+            player = { symbol = { character = 1, fgcolor = 'red' }, collision = true, shade = true },
+            floor = { symbol = { character = '.', fgcolor = 'darkslategray' } },
+            wall = { symbol = { character = 177, fgcolor = 'lightslategray', bgcolor = 'darkslategray' }, collision = true, shade = true },
+            door = { symbol = { character = '+', fgcolor = 'goldenrod' }, shade = true },
+            error = { symbol = { character = '?', bgcolor = 'red' } },
+        },
     }
     context.tileSet = tileSet
 
@@ -99,7 +107,7 @@ function love.load()
 
     -- display system
     do
-        local system = DisplaySystem(engine, rot.Display())
+        local system = DisplaySystem(engine, Terminal(tileSet))
         engine:addSystem(system, 'update')
         engine:addSystem(system, 'draw')
     end
@@ -161,5 +169,11 @@ function love.draw()
 end
 
 function love.keypressed(key, scancode, isrepeat)
-    engine.eventManager:fireEvent(KeyPressed(key, scancode, isrepeat))
+    if key == 'escape' then
+        love.event.quit()
+    elseif key == 'f5' then
+        love.event.quit('restart')
+    else
+        engine.eventManager:fireEvent(KeyPressed(key, scancode, isrepeat))
+    end
 end
