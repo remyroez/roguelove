@@ -46,8 +46,8 @@ function love.load()
     local tileSet = TileSet {
         glyph = {
             sprite = 'assets/tileset/16x16_sm_ascii.png',
-            width = 16,
-            height = 16,
+            numHorizontal = 16,
+            numVertical = 16,
         },
         tiles = {
             player = { symbol = { character = 1, fgcolor = 'red' }, collision = true, shade = true },
