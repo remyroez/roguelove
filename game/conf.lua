@@ -13,7 +13,9 @@ end
 function love.conf(t)
 	t.identity = "roguelove"
 	t.version = "0.10.2"
-	t.window = nil
+
+	--t.window = nil
+	t.window.title = "roguelove"
 
 	t.dependencies = {
 		--"middleclass",

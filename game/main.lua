@@ -11,11 +11,13 @@ local rot = require 'rot'
 
 require 'components.Collider'
 require 'components.Displayable'
+require 'components.Layer'
 require 'components.Light'
 require 'components.Map'
 require 'components.Player'
 require 'components.Position'
 require 'components.Shadow'
+require 'components.Size'
 require 'components.View'
 
 local DisplaySystem = require 'systems.DisplaySystem'
@@ -32,6 +34,7 @@ local KeyPressed = require 'events.KeyPressed'
 local Move = require 'events.Move'
 
 local TileSet = require 'core.TileSet'
+local Terminal = require 'core.Terminal'
 
 local engine = nil
 
@@ -41,11 +44,18 @@ function love.load()
     love.keyboard.setKeyRepeat(true)
 
     local tileSet = TileSet {
-        player = { symbol = { character = 1, fgcolor = 'red' }, collision = true, shade = true },
-        floor = { symbol = { character = '.', fgcolor = 'darkslategray' } },
-        wall = { symbol = { character = 177, fgcolor = 'lightslategray', bgcolor = 'darkslategray' }, collision = true, shade = true },
-        door = { symbol = { character = '+', fgcolor = 'goldenrod' }, shade = true },
-        error = { symbol = { character = '?', bgcolor = 'red' } },
+        glyph = {
+            sprite = 'assets/tileset/16x16_sm_ascii.png',
+            numHorizontal = 16,
+            numVertical = 16,
+        },
+        tiles = {
+            player = { symbol = { character = 1, fgcolor = 'red' }, collision = true, shade = true },
+            floor = { symbol = { character = '.', fgcolor = 'darkslategray' } },
+            wall = { symbol = { character = 177, fgcolor = 'lightslategray', bgcolor = 'darkslategray' }, collision = true, shade = true },
+            door = { symbol = { character = '+', fgcolor = 'goldenrod' }, shade = true },
+            error = { symbol = { character = '?', bgcolor = 'red' } },
+        },
     }
     context.tileSet = tileSet
 
@@ -99,7 +109,7 @@ function love.load()
 
     -- display system
     do
-        local system = DisplaySystem(engine, rot.Display())
+        local system = DisplaySystem(engine, Terminal(tileSet))
         engine:addSystem(system, 'update')
         engine:addSystem(system, 'draw')
     end
@@ -108,15 +118,17 @@ function love.load()
     do
         local entity = lovetoys.Entity()
 
-        local Player, Position, Displayable, Collider, Shadow, Light, View = lovetoys.Component.load {
-            'Player', 'Position', 'Displayable', 'Collider', 'Shadow', 'Light', 'View'
+        local Player, Position, Size, Layer, Displayable, Collider, Shadow, Light, View = lovetoys.Component.load {
+            'Player', 'Position', 'Size', 'Layer', 'Displayable', 'Collider', 'Shadow', 'Light', 'View'
         }
         entity:add(Player())
         entity:add(Position(10, 10))
-        entity:add(Displayable(const.layer.actor))
-        entity:add(Collider(const.layer.actor))
-        entity:add(Shadow(const.layer.actor))
-        entity:add(Light(const.layer.actor))
+        entity:add(Size())
+        entity:add(Layer(const.layer.actor))
+        entity:add(Displayable())
+        entity:add(Collider())
+        entity:add(Shadow())
+        entity:add(Light())
         entity:add(View(rot.FOV.Precise:new(shadowSystem:PreciseLightPassCallback()), 10))
 
         local tile = tileSet:get('player')
@@ -132,17 +144,19 @@ function love.load()
     do
         local entity = lovetoys.Entity()
 
-        local Map, Position, Displayable, Collider, Shadow, Light = lovetoys.Component.load {
-            'Map', 'Position', 'Displayable', 'Collider', 'Shadow', 'Light'
+        local Map, Position, Size, Layer, Displayable, Collider, Shadow, Light = lovetoys.Component.load {
+            'Map', 'Position', 'Size', 'Layer', 'Displayable', 'Collider', 'Shadow', 'Light'
         }
         local w = 80
         local h = 24
         entity:add(Map(rot.Map.Brogue(w, h)))
         entity:add(Position())
-        entity:add(Displayable(const.layer.map, w, h))
-        entity:add(Collider(const.layer.map, w, h))
-        entity:add(Shadow(const.layer.map, w, h))
-        entity:add(Light(const.layer.map, w, h))
+        entity:add(Size(w, h))
+        entity:add(Layer(const.layer.map))
+        entity:add(Displayable())
+        entity:add(Collider())
+        entity:add(Shadow())
+        entity:add(Light())
         
         entity:get('Light'):setColor(rot.Color.fromString('red'), 40, 15)
         entity:get('Light'):setColor(rot.Color.fromString('green'), 10, 15)
@@ -161,5 +175,11 @@ function love.draw()
 end
 
 function love.keypressed(key, scancode, isrepeat)
-    engine.eventManager:fireEvent(KeyPressed(key, scancode, isrepeat))
+    if key == 'escape' then
+        love.event.quit()
+    elseif key == 'f5' then
+        love.event.quit('restart')
+    else
+        engine.eventManager:fireEvent(KeyPressed(key, scancode, isrepeat))
+    end
 end

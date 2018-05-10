@@ -13,7 +13,7 @@ function ShadowSystem:initialize()
 end
 
 function ShadowSystem:requires()
-    return { 'Position', 'Shadow' }
+    return { 'Position', 'Size', 'Layer', 'Shadow' }
 end
 
 function ShadowSystem:update(dt)
@@ -30,13 +30,15 @@ function ShadowSystem:updateShadowMap()
 
     for index, entity in pairs(self.targets) do
         local position = entity:get('Position')
+        local size = entity:get('Size')
+        local layer = entity:get('Layer')
         local shadow = entity:get('Shadow')
         
-        for x = 1, shadow.width do
-            for y = 1, shadow.height do
+        for x = 1, size.width do
+            for y = 1, size.height do
                 local left = x + position.x
                 local top = y + position.y
-                util.setMap(self.shadowMap, shadow:getShade(left, top), left, top, shadow.layer)
+                util.setMap(self.shadowMap, shadow:getShade(left, top), left, top, layer:priority())
             end
         end
     end
@@ -47,8 +49,8 @@ function ShadowSystem:PreciseLightPassCallback()
         local through = true
         local found = false
         local shade = false
-        for layer = const.layer.first, const.layer.last do
-            shade = util.getMap(self.shadowMap, x, y, layer)
+        for priority = const.layer.first, const.layer.last do
+            shade = util.getMap(self.shadowMap, x, y, priority)
             if shade == nil then
                 -- nil
             else

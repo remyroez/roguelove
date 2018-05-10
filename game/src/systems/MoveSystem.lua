@@ -6,16 +6,20 @@ local Flush = require 'events.Flush'
 
 local MoveSystem = class('MoveSystem', lovetoys.System)
 
-local function isHit(srcPosition, srcCollider, distX, distY, distCollider)
+local function isHit(
+    srcPosition, srcSize, srclayer, srcCollider,
+    distPosition, distSize, distLayer, distCollider
+)
     local hit = false
-    local srcLeft, srcTop = srcPosition.x, srcPosition.y
-    local srcRight, srcBottom = (srcLeft + srcCollider.width), (srcTop + srcCollider.height)
-    local distLeft, distTop = distX, distY
-    local distRight, distBottom = (distLeft + distCollider.width), (distTop + distCollider.height)
 
-    if distCollider.layer < srcCollider.layer then
+    local srcLeft, srcTop = srcPosition.x, srcPosition.y
+    local srcRight, srcBottom = (srcLeft + srcSize.width), (srcTop + srcSize.height)
+    local distLeft, distTop = distPosition.x, distPosition.y
+    local distRight, distBottom = (distLeft + srcSize.width), (distTop + srcSize.height)
+
+    if distLayer:priority() < srclayer:priority() then
         -- under layer
-        print("distCollider.layer < srcCollider.layer", distCollider.layer, srcCollider.layer)
+        print("distLayer:priority() < srclayer:priority()", distLayer:priority(), srclayer:priority())
     elseif distLeft > srcRight then
         -- no hit
         print("distLeft > srcRight", distLeft, srcRight)
@@ -63,7 +67,7 @@ function MoveSystem:initialize(eventManager)
 end
 
 function MoveSystem:requires()
-    return { 'Position', 'Collider' }
+    return { 'Position', 'Size', 'Layer', 'Collider' }
 end
 
 function MoveSystem:update(dt)
@@ -78,9 +82,12 @@ function MoveSystem:onMove(event)
                 -- equal entity
             elseif isHit(
                 entity:get('Position'),
+                entity:get('Size'),
+                entity:get('Layer'),
                 entity:get('Collider'),
-                event.position.x + event.x,
-                event.position.y + event.y,
+                { x = event.position.x + event.x, y = event.position.y + event.y },
+                event.size,
+                event.layer,
                 event.collider
             ) then
                 hit = true
