@@ -6,16 +6,17 @@ local Flush = require 'events.Flush'
 
 local MoveSystem = class('MoveSystem', lovetoys.System)
 
-local function isHit(srcPosition, srcCollider, distX, distY, distCollider)
+local function isHit(srcPosition, srcCollider, srclayer, distPosition, distCollider, distLayer)
     local hit = false
+
     local srcLeft, srcTop = srcPosition.x, srcPosition.y
     local srcRight, srcBottom = (srcLeft + srcCollider.width), (srcTop + srcCollider.height)
-    local distLeft, distTop = distX, distY
+    local distLeft, distTop = distPosition.x, distPosition.y
     local distRight, distBottom = (distLeft + distCollider.width), (distTop + distCollider.height)
 
-    if distCollider.layer < srcCollider.layer then
+    if distLayer:priority() < srclayer:priority() then
         -- under layer
-        print("distCollider.layer < srcCollider.layer", distCollider.layer, srcCollider.layer)
+        print("distLayer:priority() < srclayer:priority()", distLayer:priority(), srclayer:priority())
     elseif distLeft > srcRight then
         -- no hit
         print("distLeft > srcRight", distLeft, srcRight)
@@ -63,7 +64,7 @@ function MoveSystem:initialize(eventManager)
 end
 
 function MoveSystem:requires()
-    return { 'Position', 'Collider' }
+    return { 'Position', 'Layer', 'Collider' }
 end
 
 function MoveSystem:update(dt)
@@ -79,9 +80,10 @@ function MoveSystem:onMove(event)
             elseif isHit(
                 entity:get('Position'),
                 entity:get('Collider'),
-                event.position.x + event.x,
-                event.position.y + event.y,
-                event.collider
+                entity:get('Layer'),
+                { x = event.position.x + event.x, y = event.position.y + event.y },
+                event.collider,
+                event.layer
             ) then
                 hit = true
                 break

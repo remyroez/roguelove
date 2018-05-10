@@ -34,7 +34,7 @@ function LightSystem:initialize(fov, ...)
 end
 
 function LightSystem:requires()
-    return { 'Position', 'Light' }
+    return { 'Position', 'Layer', 'Light' }
 end
 
 function LightSystem:update(dt)
@@ -58,13 +58,14 @@ function LightSystem:updateLighting()
     for index, entity in pairs(self.targets) do
         local position = entity:get('Position')
         local light = entity:get('Light')
+        local layer = entity:get('Layer')
         
         for x = 1, light.width do
             for y = 1, light.height do
                 local left = x + position.x
                 local top = y + position.y
                 local cell = util.getMap(map, left, top) or {}
-                cell[light.layer] = light:getColor(x, y)
+                cell[layer:priority()] = light:getColor(x, y)
                 util.setMap(map, cell, left, top)
             end
         end
@@ -75,13 +76,13 @@ function LightSystem:updateLighting()
     for key, value in pairs(map) do
         local x, y = util.splitKey(key)
         local color = nil
-        for layer = const.layer.first, const.layer.last do
-            if not value[layer] then
+        for priority = const.layer.first, const.layer.last do
+            if not value[priority] then
                 -- no color
             elseif not color then
-                color = value[layer]
+                color = value[priority]
             else
-                color = rot.Color.interpolate(color, value[layer], .5)
+                color = rot.Color.interpolate(color, value[priority], .5)
             end
         end
         self.lighting:setLight(x, y, color)

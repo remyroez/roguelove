@@ -12,7 +12,7 @@ function PlayerSystem:initialize(eventManager)
 end
 
 function PlayerSystem:requires()
-    return { 'Position', 'Collider', 'Player' }
+    return { 'Position', 'Collider', 'Layer', 'Player' }
 end
 
 function PlayerSystem:update(dt)
@@ -45,6 +45,7 @@ function PlayerSystem:keypressed(event)
                     entity.id,
                     entity:get('Position'),
                     entity:get('Collider'),
+                    entity:get('Layer'),
                     newPos[1],
                     newPos[2],
                     not love.keyboard.isDown('lctrl')

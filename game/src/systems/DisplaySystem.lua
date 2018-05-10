@@ -20,7 +20,7 @@ function DisplaySystem:initialize(engine, display)
 end
 
 function DisplaySystem:requires()
-    return { 'Position', 'Displayable' }
+    return { 'Position', 'Layer', 'Displayable' }
 end
 
 function DisplaySystem:update(dt)
@@ -46,6 +46,7 @@ function DisplaySystem:updateSymbolMap(map, visionMap, seenMap)
     for index, entity in pairs(self.targets) do
         local position = entity:get('Position')
         local displayable = entity:get('Displayable')
+        local layer = entity:get('Layer')
         for x = 1, displayable.width do
             for y = 1, displayable.height do
                 local left = x + position.x
@@ -62,7 +63,7 @@ function DisplaySystem:updateSymbolMap(map, visionMap, seenMap)
                     if vision then
                         if symbol.fgcolor then
                             newSymbol.fgcolor = rot.Color.interpolateHSL(symbol.fgcolor, rot.Color.fromString('black'), (1 - vision) * .5)
-                            if displayable.layer ~= const.layer.map then
+                            if layer:get() ~= const.layer.map then
                                 -- skip light
                             elseif light then
                                 newSymbol.fgcolor = rot.Color.add(newSymbol.fgcolor, light)
@@ -89,7 +90,7 @@ function DisplaySystem:updateSymbolMap(map, visionMap, seenMap)
                         symbol,
                         left,
                         top,
-                        displayable.layer
+                        layer:priority()
                     )
                 end
             end

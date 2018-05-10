@@ -11,6 +11,7 @@ local rot = require 'rot'
 
 require 'components.Collider'
 require 'components.Displayable'
+require 'components.Layer'
 require 'components.Light'
 require 'components.Map'
 require 'components.Player'
@@ -116,11 +117,12 @@ function love.load()
     do
         local entity = lovetoys.Entity()
 
-        local Player, Position, Displayable, Collider, Shadow, Light, View = lovetoys.Component.load {
-            'Player', 'Position', 'Displayable', 'Collider', 'Shadow', 'Light', 'View'
+        local Player, Position, Layer, Displayable, Collider, Shadow, Light, View = lovetoys.Component.load {
+            'Player', 'Position', 'Layer', 'Displayable', 'Collider', 'Shadow', 'Light', 'View'
         }
         entity:add(Player())
         entity:add(Position(10, 10))
+        entity:add(Layer(const.layer.actor))
         entity:add(Displayable(const.layer.actor))
         entity:add(Collider(const.layer.actor))
         entity:add(Shadow(const.layer.actor))
@@ -140,13 +142,14 @@ function love.load()
     do
         local entity = lovetoys.Entity()
 
-        local Map, Position, Displayable, Collider, Shadow, Light = lovetoys.Component.load {
-            'Map', 'Position', 'Displayable', 'Collider', 'Shadow', 'Light'
+        local Map, Position, Layer, Displayable, Collider, Shadow, Light = lovetoys.Component.load {
+            'Map', 'Position', 'Layer', 'Displayable', 'Collider', 'Shadow', 'Light'
         }
         local w = 80
         local h = 24
         entity:add(Map(rot.Map.Brogue(w, h)))
         entity:add(Position())
+        entity:add(Layer(const.layer.map))
         entity:add(Displayable(const.layer.map, w, h))
         entity:add(Collider(const.layer.map, w, h))
         entity:add(Shadow(const.layer.map, w, h))
