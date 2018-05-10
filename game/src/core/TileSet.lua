@@ -16,12 +16,18 @@ function TileSet:initialize(setting)
     self.glyph = setting and setting.glyph or {}
     self.tiles = setting and setting.tiles or {}
 
+    self.glyph.spriteLoader = self.glyph.spriteLoader or love.graphics.newImage
+
+    if type(self:sprite()) == 'string' then
+        self.glyph.sprite = self.glyph.spriteLoader(self.glyph.sprite)
+    end
+
     if self:sprite() then
-        self:_setupGlyph()
+        self:setupGlyph()
     end
 end
 
-function TileSet:_setupGlyph()
+function TileSet:setupGlyph()
     local sprite = self:sprite()
 
     if not self.glyph.width then

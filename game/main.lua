@@ -45,7 +45,7 @@ function love.load()
 
     local tileSet = TileSet {
         glyph = {
-            sprite = love.graphics.newImage('assets/tileset/16x16_sm_ascii.png'),
+            sprite = 'assets/tileset/16x16_sm_ascii.png',
             width = 16,
             height = 16,
         },
