@@ -1,0 +1,13 @@
+[
+    {
+        "id": "tileset_core_default",
+        "name": "Default Tileset",
+        "description": "Code page 437",
+        "type": "tileset",
+        "data": {
+            "sprite": "cp437.png",
+            "numHorizontal": 32,
+            "numVertical": 8
+        }
+    }
+]

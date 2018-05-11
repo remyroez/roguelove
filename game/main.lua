@@ -1,5 +1,6 @@
 
 local const = require 'const'
+local util = require 'util'
 
 local lovetoys = require 'lovetoys.lovetoys'
 lovetoys.initialize {
@@ -36,6 +37,9 @@ local Move = require 'events.Move'
 local TileSet = require 'core.TileSet'
 local Terminal = require 'core.Terminal'
 
+local Json = require 'asset.Json'
+local Schema = require 'asset.Schema'
+
 local engine = nil
 
 local context = {}
@@ -45,7 +49,7 @@ function love.load()
 
     local tileSet = TileSet {
         glyph = {
-            sprite = 'assets/tileset/16x16_sm_ascii.png',
+            sprite = 'assets/tileset/simple_mood/16x16_sm_ascii.png',
             numHorizontal = 16,
             numVertical = 16,
         },

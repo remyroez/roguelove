@@ -1,0 +1,22 @@
+{
+    "id": "asset_simple_mood",
+    "name": "Simple Mood 16x16 Tilesets",
+    "description": "Simple Mood Tileset for Dwarf Fortress",
+    "version": "0.0.1",
+    "uuid": "EF043C9B-486E-481B-B0E3-D7F4132773C8",
+    "authors": [
+        {
+            "name": "remyroez"
+        },
+        {
+            "name": "RogueYun",
+            "homepage": "https://github.com/RogueYun"
+        }
+    ],
+    "dependencies": {
+        "game": "*"
+    },
+    "additions": [
+        "tileset.json"
+    ]
+}

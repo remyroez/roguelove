@@ -1,0 +1,24 @@
+[
+    {
+        "id": "tileset_simple_mood_ascii",
+        "name": "Simple Mood ASCII",
+        "description": "Simple Mood Tileset for Dwarf Fortress (ASCII Version)",
+        "type": "tileset",
+        "data": {
+            "sprite": "16x16_sm_ascii.png",
+            "numHorizontal": 16,
+            "numVertical": 16
+        }
+    },
+    {
+        "id": "tileset_simple_mood_df",
+        "name": "Simple Mood DF",
+        "description": "Simple Mood Tileset for Dwarf Fortress (DF Version)",
+        "type": "tileset",
+        "data": {
+            "sprite": "16x16_sm.png",
+            "numHorizontal": 16,
+            "numVertical": 16
+        }
+    }
+]
