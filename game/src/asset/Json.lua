@@ -13,7 +13,7 @@ function Json:initialize(arg)
 end
 
 function Json:reset(json)
-    self.json = json or {}
+    self.json = setmetatable(type(json) == 'table' and json or {}, { __index = self.default})
 end
 
 function Json:serialize(path)
@@ -29,7 +29,7 @@ function Json:deserialize(path)
     if err then
         self:reset()
     else
-        self:reset(setmetatable(json, { __index = self.default}))
+        self:reset(json)
     end
 
     return err == nil, err and ('Json: ' .. err) or nil
