@@ -1,5 +1,6 @@
 
 local lume = require 'lume'
+local json = require 'json'
 
 local util = {}
 
@@ -45,6 +46,22 @@ function util.validatePosition(x, y, w, h)
     end
 
     return validate
+end
+
+function util.readJson(name)
+    local contents, sizeOrError = love.filesystem.read(name)
+    if contents == nil then
+        return {}, sizeOrError
+    else
+        local succeeded, result = pcall(json.decode, contents)
+        return (succeeded and result or {}), (not succeeded and result or nil)
+    end
+    return {}, 'fatal error.'
+end
+
+function util.writeJson(name, data)
+    local contents = json.encode(data)
+    return love.filesystem.write(name, contents)
 end
 
 return util
