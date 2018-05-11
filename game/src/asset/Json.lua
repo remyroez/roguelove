@@ -5,15 +5,15 @@ local class = require 'middleclass'
 
 local Json = class('Json')
 
-function Json:initialize(path)
-    self.path = type(path) == 'string' and path or ''
-    self.json = {}
+Json.static.default = {}
 
-    self:reset()
+function Json:initialize(arg)
+    self.path = type(arg) == 'string' and arg or ''
+    self.json = type(arg) == 'table' and arg or {}
 end
 
-function Json:reset()
-    self.json = {}
+function Json:reset(json)
+    self.json = json or {}
 end
 
 function Json:serialize(path)
@@ -24,10 +24,15 @@ end
 function Json:deserialize(path)
     self.path = path or self.path
 
-    local err
-    self.json, err = util.readJson(self.path)
+    local json, err = util.readJson(self.path)
 
-    return err == nil, err
+    if err then
+        self:reset()
+    else
+        self:reset(setmetatable(json, { __index = self.default}))
+    end
+
+    return err == nil, err and ('Json: ' .. err) or nil
 end
 
 return Json
