@@ -5,8 +5,9 @@ local class = require 'middleclass'
 
 local Asset = class('Asset')
 
-function Asset:initialize(json)
+function Asset:initialize(json, path)
     self.json = json or {}
+    self.path = path or ''
 end
 
 function Asset:id()
