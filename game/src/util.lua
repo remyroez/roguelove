@@ -90,6 +90,11 @@ function util.fileDirectory(path)
     return table.concat(dirs, '/')
 end
 
+function util.fileFirstDirectory(path)
+    local dirs = lume.split(path, '/')
+    return dirs[1]
+end
+
 function util.isZip(path)
     return util.fileExtension(path) == '.zip'
 end
