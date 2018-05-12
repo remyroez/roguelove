@@ -72,6 +72,21 @@ function System:newAsset(basePath)
     return asset
 end
 
+function System:newImage(id, path)
+    local image
+
+    local asset = self:get(id)
+    if asset then
+        image = love.graphics.newImage(util.fileDirectory(asset.path) .. '/' .. path)
+    end
+
+    if not image then
+        image = love.graphics.newImage(path)
+    end
+
+    return image
+end
+
 function System:register(json, path)
     local asset = Asset(json, path)
 
