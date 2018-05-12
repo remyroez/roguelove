@@ -64,4 +64,28 @@ function util.writeJson(name, data)
     return love.filesystem.write(name, contents)
 end
 
+function util.lastDimension(t, ...)
+    local node = t
+    local args = {...}
+    for _, key in ipairs(args) do
+        if type(node[key]) ~= 'table' then
+            node[key] = {}
+        end
+        node = node[key]
+    end
+    return node
+end
+
+function util.fileName(path)
+    return path:match("^.+/(.+)$")
+end
+
+function util.fileExtension(path)
+    return path:match("^.+(%..+)$")
+end
+
+function util.isZip(path)
+    return util.fileExtension(path) == '.zip'
+end
+
 return util
