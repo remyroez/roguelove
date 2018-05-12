@@ -26,8 +26,8 @@ function Asset:isType(type)
     return self:type() == type
 end
 
-function Asset:data(key)
-    return key == nil and self.json.data or self.json.data[key]
+function Asset:properties(key)
+    return key == nil and self.json.properties or self.json.properties[key]
 end
 
 return Asset

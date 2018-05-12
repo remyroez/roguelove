@@ -9,6 +9,8 @@ local Asset = require 'asset.Asset'
 
 local System = class('AssetSystem', lovetoys.System)
 
+System.static.infoFileName = 'info.json'
+
 function System:initialize()
     System.super.initialize(self)
 
@@ -38,14 +40,14 @@ function System:newAsset(basePath)
     local isZip = util.isZip(basePath)
 
     if isDir then
-        path = path .. "/asset.json"
+        path = path .. "/" .. System.infoFileName
     elseif isZip then
         love.filesystem.mount(basePath, '__temp')
-        path = "__temp/asset.json"
+        path = "__temp/" .. System.infoFileName
     end
 
     if not love.filesystem.exists(path) then
-        print(basePath, 'asset.json not found.')
+        print(basePath, System.infoFileName .. ' not found.')
     else
         local json = Json(path)
         local succeeded, err = json:deserialize()
@@ -63,7 +65,7 @@ function System:newAsset(basePath)
         else
             asset = self:register(json.json, path)
     
-            if asset:isType('asset') and (isDir or isZip) then
+            if asset:isType('info') and (isDir or isZip) then
                 love.filesystem.mount(basePath, asset:id(), true)
             end
         end
@@ -94,8 +96,8 @@ function System:register(json, path)
 
     self.assets[asset:id()] = asset
 
-    if asset:type() == 'asset' then
-        self.versions[asset:id()] = asset:data('version') or '0'
+    if asset:isType('info') then
+        self.versions[asset:id()] = asset:properties('version') or '0'
     end
 
     return asset
@@ -104,7 +106,7 @@ end
 function System:deregister(id)
     local asset = self:get(id)
 
-    if asset:type() == 'asset' then
+    if asset:isType('info') then
         self.versions[id] = nil
     end
     
