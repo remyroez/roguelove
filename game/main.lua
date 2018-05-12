@@ -56,12 +56,17 @@ function love.load()
         local system = AssetSystem()
         engine:addSystem(system)
         engine:stopSystem(system.class.name)
+
+        system:newAsset('assets/core')
+        system:newAsset('assets/tileset/simple_mood')
+
         assetSystem = system
     end
 
     local tileSet = TileSet {
         glyph = {
-            sprite = 'assets/tileset/simple_mood/16x16_sm_ascii.png',
+            sprite = '16x16_sm_ascii.png',
+            spriteLoader = function (...) return assetSystem:newImage('simple_mood', ...) end,
             numHorizontal = 16,
             numVertical = 16,
         },
