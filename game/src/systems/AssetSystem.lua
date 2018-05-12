@@ -77,7 +77,9 @@ function System:newImage(id, path)
 
     local asset = self:get(id)
     if asset then
-        image = love.graphics.newImage(util.fileDirectory(asset.path) .. '/' .. path)
+        if util.fileFirstDirectory(asset.path) == 'assets' then
+            image = love.graphics.newImage(util.fileDirectory(asset.path) .. '/' .. path)
+        end
     end
 
     if not image then
