@@ -28,6 +28,7 @@ local MoveSystem = require 'systems.MoveSystem'
 local PlayerSystem = require 'systems.PlayerSystem'
 local ShadowSystem = require 'systems.ShadowSystem'
 local ViewSystem = require 'systems.ViewSystem'
+local AssetSystem = require 'systems.AssetSystem'
 
 local Collection = require 'events.Collection'
 local Flush = require 'events.Flush'
@@ -47,6 +48,17 @@ local context = {}
 function love.load()
     love.keyboard.setKeyRepeat(true)
 
+    engine = lovetoys.Engine()
+
+    -- asset system
+    local assetSystem
+    do
+        local system = AssetSystem()
+        engine:addSystem(system)
+        engine:stopSystem(system.class.name)
+        assetSystem = system
+    end
+
     local tileSet = TileSet {
         glyph = {
             sprite = 'assets/tileset/simple_mood/16x16_sm_ascii.png',
@@ -62,8 +74,6 @@ function love.load()
         },
     }
     context.tileSet = tileSet
-
-    engine = lovetoys.Engine()
 
     -- player system
     do

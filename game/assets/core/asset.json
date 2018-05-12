@@ -1,19 +1,23 @@
 {
     "id": "core",
     "name": "Core Assets",
-    "version": "0.0.1",
-    "uuid": "26BEC7B0-40E0-4A20-AD9A-F512923E704F",
-    "authors": [
-        {
-            "name": "remyroez",
-            "homepage": "https://github.com/remyroez"
-        }
-    ],
-    "dependencies": {
-        "game": "*"
-    },
-    "assets": [
-        "object.json",
-        "tileset.json"
-    ]
+    "type": "asset",
+    "data": {
+        "description": "Core Assets",
+        "version": "0.0.1",
+        "uuid": "26BEC7B0-40E0-4A20-AD9A-F512923E704F",
+        "authors": [
+            {
+                "name": "remyroez",
+                "homepage": "https://github.com/remyroez"
+            }
+        ],
+        "dependencies": {
+            "game": "*"
+        },
+        "assets": [
+            "object.json",
+            "tileset.json"
+        ]
+    }
 }
