@@ -16,6 +16,7 @@ function System:initialize()
 
     self.assets = {}
     self.versions = {}
+    self.resourceLoaders = {}
     
     self.active = false
 end
@@ -29,6 +30,7 @@ function System:update(dt)
 end
 
 function System:newAsset(basePath)
+    local asset
     local path = basePath
 
     if not love.filesystem.exists(basePath) then
@@ -56,8 +58,6 @@ function System:newAsset(basePath)
             love.filesystem.unmount(basePath)
         end
     
-        local asset
-    
         if not succeeded then
             print(json.path, err)
         elseif type(json.json) ~= 'table' then
@@ -72,6 +72,12 @@ function System:newAsset(basePath)
     end
 
     return asset
+end
+
+function System:makeLoaderSet(id)
+    return {
+        newImage = function (...) return self:newImage(id, ...) end
+    }
 end
 
 function System:newImage(id, path)
@@ -93,6 +99,9 @@ end
 
 function System:register(json, path)
     local asset = Asset(json, path)
+    
+    asset.loaderSet = self:resourceLoader(asset:id())
+    asset:gotoState(asset:type())
 
     self.assets[asset:id()] = asset
 
@@ -111,6 +120,13 @@ function System:deregister(id)
     end
     
     self.assets[id] = nil
+end
+
+function System:resourceLoader(id)
+    if not self.resourceLoaders[id] then
+        self.resourceLoaders[id] = self:makeLoaderSet(id)
+    end
+    return self.resourceLoaders[id]
 end
 
 function System:get(id)
