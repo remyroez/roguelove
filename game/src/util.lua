@@ -84,6 +84,12 @@ function util.fileExtension(path)
     return path:match("^.+(%..+)$")
 end
 
+function util.fileDirectory(path)
+    local dirs = lume.split(path, '/')
+    dirs[#dirs] = nil
+    return table.concat(dirs, '/')
+end
+
 function util.isZip(path)
     return util.fileExtension(path) == '.zip'
 end
