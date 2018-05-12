@@ -41,6 +41,10 @@ local Terminal = require 'core.Terminal'
 local Json = require 'asset.Json'
 local Schema = require 'asset.Schema'
 
+local Asset = require 'asset.Asset'
+require 'asset.Tileset'
+require 'asset.Info'
+
 local engine = nil
 
 local context = {}
