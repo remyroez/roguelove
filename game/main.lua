@@ -35,7 +35,6 @@ local Flush = require 'events.Flush'
 local KeyPressed = require 'events.KeyPressed'
 local Move = require 'events.Move'
 
-local TileSet = require 'core.TileSet'
 local Terminal = require 'core.Terminal'
 
 local Json = require 'asset.Json'
