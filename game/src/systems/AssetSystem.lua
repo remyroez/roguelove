@@ -4,6 +4,8 @@ local util = require 'util'
 local class = require 'middleclass'
 local lovetoys = require 'lovetoys.lovetoys'
 
+local lume = require 'lume'
+
 local Json = require 'asset.Json'
 local Asset = require 'asset.Asset'
 
@@ -50,6 +52,10 @@ function System:newAsset(basePath)
 
     if not love.filesystem.exists(path) then
         print(basePath, System.infoFileName .. ' not found.')
+        
+        if isZip then
+            love.filesystem.unmount(basePath)
+        end
     else
         local json = Json(path)
         local succeeded, err = json:deserialize()
@@ -65,8 +71,8 @@ function System:newAsset(basePath)
         else
             asset = self:register(json.json, path)
     
-            if asset:isType('info') and (isDir or isZip) then
-                love.filesystem.mount(basePath, asset:id(), true)
+            if asset:typeis('info') and (isDir or isZip) then
+                love.filesystem.mount(basePath, '<' .. asset:id() .. '>', true)
             end
         end
     end
@@ -87,6 +93,8 @@ function System:newImage(id, path)
     if asset then
         if util.fileFirstDirectory(asset.path) == 'assets' then
             image = love.graphics.newImage(util.fileDirectory(asset.path) .. '/' .. path)
+        else
+            image = love.graphics.newImage('<' .. asset:root() .. '>/' .. path)
         end
     end
 
@@ -97,25 +105,68 @@ function System:newImage(id, path)
     return image
 end
 
-function System:register(json, path)
-    local asset = Asset(json, path)
-    
-    asset.loaderSet = self:resourceLoader(asset:id())
-    asset:gotoState(asset:type())
+function System:register(json, path, parent)
+    local asset = Asset(json, path, parent)
 
+    asset.loaderSet = self:resourceLoader(asset:root())
+    asset:gotoState(asset:type())
+print('register', asset:id())
     self.assets[asset:id()] = asset
 
-    if asset:isType('info') then
+    if asset:typeis('info') then
         self.versions[asset:id()] = asset:properties('version') or '0'
+        self:newChildAssets(asset)
     end
 
     return asset
 end
 
+function System:newChildAssets(parentAsset)
+    local data = parentAsset:properties('data')
+
+    if type(data) ~= 'table' then
+        -- data is not table.
+        return
+    end
+
+    local dir = parentAsset.path
+    if not love.filesystem.isDirectory(dir) then
+        dir = util.fileDirectory(dir)
+    end
+
+    local asset
+    
+    for _, name in ipairs(data) do
+        local path = dir .. '/' .. name
+        if love.filesystem.isDirectory(path) then
+            self:newAsset(path)
+        else
+            local json = Json(path)
+            local succeeded, err = json:deserialize()
+            
+            if not succeeded then
+                print(json.path, err)
+            elseif type(json.json) ~= 'table' then
+                print(json.path, "json is not object type.")
+            elseif lume.isarray(json.json) then
+                for _, chunk in ipairs(json.json) do
+                    asset = self:register(
+                        chunk,
+                        path,
+                        parentAsset
+                    )
+                end
+            else
+                asset = self:register(json.json, path, parentAsset)
+            end
+        end
+    end
+end
+
 function System:deregister(id)
     local asset = self:get(id)
 
-    if asset:isType('info') then
+    if asset:typeis('info') then
         self.versions[id] = nil
     end
     

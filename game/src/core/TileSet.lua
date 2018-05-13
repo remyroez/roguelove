@@ -13,51 +13,7 @@ TileSet.static.defaultNumVertical = 8
 TileSet.static.defaultNumGlyphs = TileSet.static.defaultNumHorizontal * TileSet.static.defaultNumVertical
 
 function TileSet:initialize(setting)
-    self.glyph = setting and setting.glyph or {}
     self.tiles = setting and setting.tiles or {}
-
-    self.glyph.spriteLoader = self.glyph.spriteLoader or love.graphics.newImage
-
-    if type(self:sprite()) == 'string' then
-        self.glyph.sprite = self.glyph.spriteLoader(self.glyph.sprite)
-    end
-
-    if self:sprite() then
-        self:setupGlyph()
-    end
-end
-
-function TileSet:setupGlyph()
-    local sprite = self:sprite()
-
-    if not self.glyph.width then
-        self.glyph.width = lume.round(sprite:getWidth() / self:numHorizontal())
-    elseif not self.glyph.numHorizontal then
-        self.glyph.numHorizontal = lume.round(sprite:getWidth() / self:width())
-    end
-
-    if not self.glyph.height then
-        self.glyph.height = lume.round(sprite:getHeight() / self:numVertical())
-    elseif not self.glyph.numVertical then
-        self.glyph.numVertical = lume.round(sprite:getHeight() / self:height())
-    end
-    
-    local lg = love.graphics
-
-    if type(self.glyph.quads) ~= 'table' then
-        self.glyph.quads = {}
-    end
-
-    for i = 0, (self:numGlyphs() - 1) do
-        self.glyph.quads[i] = lg.newQuad(
-            (i % self:numHorizontal()) * self:width(),
-            math.floor(i / self:numHorizontal()) * self:height(),
-            self:width(),
-            self:height(),
-            sprite:getWidth(),
-            sprite:getHeight()
-        )
-    end
 end
 
 function TileSet:get(name)

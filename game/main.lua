@@ -68,12 +68,6 @@ function love.load()
     end
 
     local tileSet = TileSet {
-        glyph = {
-            sprite = '16x16_sm_ascii.png',
-            spriteLoader = function (...) return assetSystem:newImage('simple_mood', ...) end,
-            numHorizontal = 16,
-            numVertical = 16,
-        },
         tiles = {
             player = { symbol = { character = 1, fgcolor = 'red' }, collision = true, shade = true },
             floor = { symbol = { character = '.', fgcolor = 'darkslategray' } },
@@ -101,7 +95,9 @@ function love.load()
     end
 
     -- map system
-    engine:addSystem(MapSystem(tileSet))
+    do
+        engine:addSystem(MapSystem(tileSet))
+    end
     
     -- shadow system
     local shadowSystem = nil
@@ -132,7 +128,10 @@ function love.load()
 
     -- display system
     do
-        local system = DisplaySystem(engine, Terminal(tileSet))
+        local tileset = assetSystem:get('tileset_simple_mood_ascii')
+        tileset:load()
+        
+        local system = DisplaySystem(engine, Terminal(tileset))
         engine:addSystem(system, 'update')
         engine:addSystem(system, 'draw')
     end
