@@ -19,19 +19,19 @@ local function isHit(
 
     if distLayer:priority() < srclayer:priority() then
         -- under layer
-        print("distLayer:priority() < srclayer:priority()", distLayer:priority(), srclayer:priority())
+        --print("distLayer:priority() < srclayer:priority()", distLayer:priority(), srclayer:priority())
     elseif distLeft > srcRight then
         -- no hit
-        print("distLeft > srcRight", distLeft, srcRight)
+        --print("distLeft > srcRight", distLeft, srcRight)
     elseif distTop > srcBottom then
         -- no hit
-        print("distTop > srcBottom", distTop, srcBottom)
+        --print("distTop > srcBottom", distTop, srcBottom)
     elseif distRight < srcLeft then
         -- no hit
-        print("distRight < srcLeft", distRight, srcLeft)
+        --print("distRight < srcLeft", distRight, srcLeft)
     elseif distBottom < srcTop then
         -- no hit
-        print("distBottom < srcTop", distBottom, srcTop)
+        --print("distBottom < srcTop", distBottom, srcTop)
     else
         local left = math.min(srcLeft, distLeft)
         local top = math.min(srcTop, distTop)
