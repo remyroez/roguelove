@@ -19,6 +19,8 @@ function love.conf(t)
 
 	t.dependencies = {
 		--"middleclass",
-		"lovetoys"
+		"lovetoys",
+		"ljsonschema",
+		"semver"
 	}
 end

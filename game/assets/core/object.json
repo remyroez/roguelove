@@ -1,0 +1,63 @@
+[
+    {
+        "id": "object_core_player",
+        "type": "object",
+        "properties": {
+            "name": "player",
+            "collision": true,
+            "shade": true,
+            "symbol": {
+                "fgcolor": "red",
+                "character": 1
+            }
+        }
+    },
+    {
+        "id": "object_core_wall",
+        "type": "object",
+        "properties": {
+            "name": "wall",
+            "collision": true,
+            "shade": true,
+            "symbol": {
+                "character": 177,
+                "fgcolor": "lightslategray",
+                "bgcolor": "darkslategray"
+            }
+        }
+    },
+    {
+        "id": "object_core_door",
+        "type": "object",
+        "properties": {
+            "name": "door",
+            "shade": true,
+            "symbol": {
+                "fgcolor": "goldenrod",
+                "character": 43
+            }
+        }
+    },
+    {
+        "id": "object_core_floor",
+        "type": "object",
+        "properties": {
+            "name": "floor",
+            "symbol": {
+                "fgcolor": "darkslategray",
+                "character": 46
+            }
+        }
+    },
+    {
+        "id": "object_core_error",
+        "type": "object",
+        "properties": {
+            "name": "ERROR",
+            "symbol": {
+                "bgcolor": "red",
+                "character": 63
+            }
+        }
+    }
+]

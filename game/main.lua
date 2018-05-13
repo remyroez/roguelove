@@ -1,5 +1,6 @@
 
 local const = require 'const'
+local util = require 'util'
 
 local lovetoys = require 'lovetoys.lovetoys'
 lovetoys.initialize {
@@ -27,14 +28,22 @@ local MoveSystem = require 'systems.MoveSystem'
 local PlayerSystem = require 'systems.PlayerSystem'
 local ShadowSystem = require 'systems.ShadowSystem'
 local ViewSystem = require 'systems.ViewSystem'
+local AssetSystem = require 'systems.AssetSystem'
 
 local Collection = require 'events.Collection'
 local Flush = require 'events.Flush'
 local KeyPressed = require 'events.KeyPressed'
 local Move = require 'events.Move'
 
-local TileSet = require 'core.TileSet'
 local Terminal = require 'core.Terminal'
+
+local Json = require 'asset.Json'
+local Schema = require 'asset.Schema'
+
+local Asset = require 'asset.Asset'
+require 'asset.Tileset'
+require 'asset.Info'
+require 'asset.Object'
 
 local engine = nil
 
@@ -43,23 +52,20 @@ local context = {}
 function love.load()
     love.keyboard.setKeyRepeat(true)
 
-    local tileSet = TileSet {
-        glyph = {
-            sprite = 'assets/tileset/16x16_sm_ascii.png',
-            numHorizontal = 16,
-            numVertical = 16,
-        },
-        tiles = {
-            player = { symbol = { character = 1, fgcolor = 'red' }, collision = true, shade = true },
-            floor = { symbol = { character = '.', fgcolor = 'darkslategray' } },
-            wall = { symbol = { character = 177, fgcolor = 'lightslategray', bgcolor = 'darkslategray' }, collision = true, shade = true },
-            door = { symbol = { character = '+', fgcolor = 'goldenrod' }, shade = true },
-            error = { symbol = { character = '?', bgcolor = 'red' } },
-        },
-    }
-    context.tileSet = tileSet
-
     engine = lovetoys.Engine()
+
+    -- asset system
+    local assetSystem
+    do
+        local system = AssetSystem()
+        engine:addSystem(system)
+        engine:stopSystem(system.class.name)
+
+        system:newAsset('assets/core')
+        system:newAsset('assets/tileset/simple_mood')
+
+        assetSystem = system
+    end
 
     -- player system
     do
@@ -78,7 +84,9 @@ function love.load()
     end
 
     -- map system
-    engine:addSystem(MapSystem(tileSet))
+    do
+        engine:addSystem(MapSystem())
+    end
     
     -- shadow system
     local shadowSystem = nil
@@ -109,7 +117,10 @@ function love.load()
 
     -- display system
     do
-        local system = DisplaySystem(engine, Terminal(tileSet))
+        local tileset = assetSystem:get('tileset_simple_mood_ascii')
+        tileset:load()
+        
+        local system = DisplaySystem(engine, Terminal(tileset))
         engine:addSystem(system, 'update')
         engine:addSystem(system, 'draw')
     end
@@ -131,10 +142,10 @@ function love.load()
         entity:add(Light())
         entity:add(View(rot.FOV.Precise:new(shadowSystem:PreciseLightPassCallback()), 10))
 
-        local tile = tileSet:get('player')
-        entity:get('Displayable'):setSymbol(tile.symbol)
-        entity:get('Collider'):setCollision(tile.collision)
-        entity:get('Shadow'):setShade(tile.shade)
+        local object = assetSystem:get('object_core_player')
+        entity:get('Displayable'):setSymbol(object:symbol())
+        entity:get('Collider'):setCollision(object:collision())
+        entity:get('Shadow'):setShade(object:shade())
         entity:get('Light'):setColor(rot.Color.fromString('goldenrod'))
 
         engine:addEntity(entity)
@@ -149,7 +160,24 @@ function love.load()
         }
         local w = 80
         local h = 24
-        entity:add(Map(rot.Map.Brogue(w, h)))
+        local callback = function (entity)
+            return function (x, y, value)
+                local obj = nil
+                if value == 0 then
+                    obj = assetSystem:get('object_core_floor')
+                elseif value == 1 then
+                    obj = assetSystem:get('object_core_wall')
+                elseif value == 2 then
+                    obj = assetSystem:get('object_core_door')
+                else
+                    obj = assetSystem:get('object_core_error')
+                end
+                entity:get('Displayable'):setSymbol(obj:symbol(), x, y)
+                entity:get('Collider'):setCollision(obj:collision(), x, y)
+                entity:get('Shadow'):setShade(obj:shade(), x, y)
+            end
+        end
+        entity:add(Map(rot.Map.Brogue(w, h), callback))
         entity:add(Position())
         entity:add(Size(w, h))
         entity:add(Layer(const.layer.map))
