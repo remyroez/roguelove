@@ -3,6 +3,7 @@ local class = require 'middleclass'
 local lovetoys = require 'lovetoys.lovetoys'
 
 local Move = require 'events.Move'
+local NextTurn = require 'events.NextTurn'
 
 local PlayerSystem = class('PlayerSystem', lovetoys.System)
 
@@ -12,7 +13,7 @@ function PlayerSystem:initialize(eventManager)
 end
 
 function PlayerSystem:requires()
-    return { 'Position', 'Size', 'Layer', 'Collider', 'Player' }
+    return { 'Player', 'Actor', 'Position', 'Size', 'Layer', 'Collider' }
 end
 
 function PlayerSystem:update(dt)
@@ -40,19 +41,25 @@ function PlayerSystem:keypressed(event)
     
     if update then
         for index, entity in pairs(self.targets) do
-            self.eventManager:fireEvent(
-                Move(
-                    entity.id,
-                    entity:get('Position'),
-                    entity:get('Size'),
-                    entity:get('Layer'),
-                    entity:get('Collider'),
-                    newPos[1],
-                    newPos[2],
-                    not love.keyboard.isDown('lctrl')
-                )
+            local actor = entity:get('Actor')
+            actor:schedule(
+                function (entityActor)
+                    self.eventManager:fireEvent(
+                        Move(
+                            entity.id,
+                            entity:get('Position'),
+                            entity:get('Size'),
+                            entity:get('Layer'),
+                            entity:get('Collider'),
+                            newPos[1],
+                            newPos[2],
+                            not love.keyboard.isDown('lctrl')
+                        )
+                    )
+                end
             )
         end
+        self.eventManager:fireEvent(NextTurn())
     end
 end
 

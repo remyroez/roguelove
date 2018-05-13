@@ -10,6 +10,7 @@ lovetoys.initialize {
 }
 local rot = require 'rot'
 
+require 'components.Actor'
 require 'components.Collider'
 require 'components.Displayable'
 require 'components.Layer'
@@ -21,6 +22,7 @@ require 'components.Shadow'
 require 'components.Size'
 require 'components.View'
 
+local ActorSystem = require 'systems.ActorSystem'
 local DisplaySystem = require 'systems.DisplaySystem'
 local LightSystem = require 'systems.LightSystem'
 local MapSystem = require 'systems.MapSystem'
@@ -34,6 +36,7 @@ local Collection = require 'events.Collection'
 local Flush = require 'events.Flush'
 local KeyPressed = require 'events.KeyPressed'
 local Move = require 'events.Move'
+local NextTurn = require 'events.NextTurn'
 
 local Terminal = require 'core.Terminal'
 
@@ -65,6 +68,15 @@ function love.load()
         system:newAsset('assets/tileset/simple_mood')
 
         assetSystem = system
+    end
+    
+    -- actor system
+    do
+        local system = ActorSystem(rot.Scheduler.Speed())
+        engine:addSystem(system)
+        engine.eventManager:addListener(lovetoys.ComponentAdded.name, system, system.componentAdded)
+        engine.eventManager:addListener(lovetoys.ComponentRemoved.name, system, system.componentRemoved)
+        engine.eventManager:addListener(NextTurn.name, system, system.nextTurn)
     end
 
     -- player system
@@ -129,10 +141,11 @@ function love.load()
     do
         local entity = lovetoys.Entity()
 
-        local Player, Position, Size, Layer, Displayable, Collider, Shadow, Light, View = lovetoys.Component.load {
-            'Player', 'Position', 'Size', 'Layer', 'Displayable', 'Collider', 'Shadow', 'Light', 'View'
+        local Player, Actor, Position, Size, Layer, Displayable, Collider, Shadow, Light, View = lovetoys.Component.load {
+            'Player', 'Actor', 'Position', 'Size', 'Layer', 'Displayable', 'Collider', 'Shadow', 'Light', 'View'
         }
         entity:add(Player())
+        entity:add(Actor(100))
         entity:add(Position(10, 10))
         entity:add(Size())
         entity:add(Layer(const.layer.actor))
@@ -147,6 +160,35 @@ function love.load()
         entity:get('Collider'):setCollision(object:collision())
         entity:get('Shadow'):setShade(object:shade())
         entity:get('Light'):setColor(rot.Color.fromString('goldenrod'))
+
+        engine:addEntity(entity)
+    end
+
+    -- other actor
+    do
+        local entity = lovetoys.Entity()
+
+        local Actor, Position, Size, Layer, Displayable, Collider, Shadow, Light, View = lovetoys.Component.load {
+            'Actor', 'Position', 'Size', 'Layer', 'Displayable', 'Collider', 'Shadow', 'Light', 'View'
+        }
+        entity:add(Actor(100))
+        entity:add(Position(20, 10))
+        entity:add(Size())
+        entity:add(Layer(const.layer.actor))
+        entity:add(Displayable())
+        entity:add(Collider())
+        entity:add(Shadow())
+        entity:add(Light())
+        --entity:add(View(rot.FOV.Precise:new(shadowSystem:PreciseLightPassCallback()), 10))
+
+        local object = assetSystem:get('object_core_player')
+        entity:get('Displayable'):setSymbol(object:symbol())
+        entity:get('Collider'):setCollision(object:collision())
+        entity:get('Shadow'):setShade(object:shade())
+        entity:get('Light'):setColor(rot.Color.fromString('purple'))
+        entity:get('Actor'):schedule(function () print('hoge 1') end, 30)
+        entity:get('Actor'):schedule(function () print('hoge 2') end, 20)
+        entity:get('Actor'):schedule(function () print('hoge 3') end, 10)
 
         engine:addEntity(entity)
     end
