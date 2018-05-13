@@ -110,7 +110,7 @@ function System:register(json, path, parent)
 
     asset.loaderSet = self:resourceLoader(asset:root())
     asset:gotoState(asset:type())
-print('register', asset:id())
+
     self.assets[asset:id()] = asset
 
     if asset:typeis('info') then
@@ -151,9 +151,7 @@ function System:newChildAssets(parentAsset)
             elseif lume.isarray(json.json) then
                 for _, chunk in ipairs(json.json) do
                     asset = self:register(
-                        chunk,
-                        path,
-                        parentAsset
+                        chunk, path, parentAsset
                     )
                 end
             else
