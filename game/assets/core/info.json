@@ -16,6 +16,7 @@
             "game": "*"
         },
         "data": [
+            "object.json",
             "tileset.json"
         ]
     }

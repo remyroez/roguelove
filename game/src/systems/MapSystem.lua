@@ -5,27 +5,8 @@ local rot = require 'rot'
 
 local MapSystem = class('MapSystem', lovetoys.System)
 
-local function BrogueMapGenerator(tileSet, entity)
-    return function (x, y, value)
-        local tile = nil
-        if value == 0 then
-            tile = tileSet:get('floor')
-        elseif value == 1 then
-            tile = tileSet:get('wall')
-        elseif value == 2 then
-            tile = tileSet:get('door')
-        else
-            tile = tileSet:get('error')
-        end
-        entity:get('Displayable'):setSymbol(tile.symbol, x, y)
-        entity:get('Collider'):setCollision(tile.collision, x, y)
-        entity:get('Shadow'):setShade(tile.shade, x, y)
-    end
-end
-
-function MapSystem:initialize(tileSet)
+function MapSystem:initialize()
     lovetoys.System.initialize(self)
-    self.tileSet = tileSet
 end
 
 function MapSystem:requires()
@@ -33,8 +14,6 @@ function MapSystem:requires()
 end
 
 function MapSystem:update(dt)
-    if self.tileSet == nil then return end
-
     for index, entity in pairs(self.targets) do
         local map = entity:get('Map')
         
@@ -43,7 +22,7 @@ function MapSystem:update(dt)
             entity:get('Collider'):clear()
             entity:get('Shadow'):clear()
     
-            map:create(BrogueMapGenerator(self.tileSet, entity))
+            map:create(entity)
             map.dirty = false
         end
     end

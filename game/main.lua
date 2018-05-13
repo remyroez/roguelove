@@ -44,6 +44,7 @@ local Schema = require 'asset.Schema'
 local Asset = require 'asset.Asset'
 require 'asset.Tileset'
 require 'asset.Info'
+require 'asset.Object'
 
 local engine = nil
 
@@ -67,17 +68,6 @@ function love.load()
         assetSystem = system
     end
 
-    local tileSet = TileSet {
-        tiles = {
-            player = { symbol = { character = 1, fgcolor = 'red' }, collision = true, shade = true },
-            floor = { symbol = { character = '.', fgcolor = 'darkslategray' } },
-            wall = { symbol = { character = 177, fgcolor = 'lightslategray', bgcolor = 'darkslategray' }, collision = true, shade = true },
-            door = { symbol = { character = '+', fgcolor = 'goldenrod' }, shade = true },
-            error = { symbol = { character = '?', bgcolor = 'red' } },
-        },
-    }
-    context.tileSet = tileSet
-
     -- player system
     do
         local system = PlayerSystem(engine.eventManager)
@@ -96,7 +86,7 @@ function love.load()
 
     -- map system
     do
-        engine:addSystem(MapSystem(tileSet))
+        engine:addSystem(MapSystem())
     end
     
     -- shadow system
@@ -153,10 +143,10 @@ function love.load()
         entity:add(Light())
         entity:add(View(rot.FOV.Precise:new(shadowSystem:PreciseLightPassCallback()), 10))
 
-        local tile = tileSet:get('player')
-        entity:get('Displayable'):setSymbol(tile.symbol)
-        entity:get('Collider'):setCollision(tile.collision)
-        entity:get('Shadow'):setShade(tile.shade)
+        local object = assetSystem:get('object_core_player')
+        entity:get('Displayable'):setSymbol(object:symbol())
+        entity:get('Collider'):setCollision(object:collision())
+        entity:get('Shadow'):setShade(object:shade())
         entity:get('Light'):setColor(rot.Color.fromString('goldenrod'))
 
         engine:addEntity(entity)
@@ -171,7 +161,24 @@ function love.load()
         }
         local w = 80
         local h = 24
-        entity:add(Map(rot.Map.Brogue(w, h)))
+        local callback = function (entity)
+            return function (x, y, value)
+                local obj = nil
+                if value == 0 then
+                    obj = assetSystem:get('object_core_floor')
+                elseif value == 1 then
+                    obj = assetSystem:get('object_core_wall')
+                elseif value == 2 then
+                    obj = assetSystem:get('object_core_door')
+                else
+                    obj = assetSystem:get('object_core_error')
+                end
+                entity:get('Displayable'):setSymbol(obj:symbol(), x, y)
+                entity:get('Collider'):setCollision(obj:collision(), x, y)
+                entity:get('Shadow'):setShade(obj:shade(), x, y)
+            end
+        end
+        entity:add(Map(rot.Map.Brogue(w, h), callback))
         entity:add(Position())
         entity:add(Size(w, h))
         entity:add(Layer(const.layer.map))
