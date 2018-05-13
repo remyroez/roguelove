@@ -1,9 +1,9 @@
 [
     {
         "id": "object_core_player",
-        "name": "player",
         "type": "object",
         "properties": {
+            "name": "player",
             "collision": true,
             "shade": true,
             "symbol": {
@@ -14,9 +14,9 @@
     },
     {
         "id": "object_core_wall",
-        "name": "wall",
         "type": "object",
         "properties": {
+            "name": "wall",
             "collision": true,
             "shade": true,
             "symbol": {
@@ -28,9 +28,9 @@
     },
     {
         "id": "object_core_door",
-        "name": "door",
         "type": "object",
         "properties": {
+            "name": "door",
             "shade": true,
             "symbol": {
                 "fgcolor": "goldenrod",
@@ -40,9 +40,9 @@
     },
     {
         "id": "object_core_floor",
-        "name": "floor",
         "type": "object",
         "properties": {
+            "name": "floor",
             "symbol": {
                 "fgcolor": "darkslategray",
                 "character": 46
@@ -51,9 +51,9 @@
     },
     {
         "id": "object_core_error",
-        "name": "ERROR",
         "type": "object",
         "properties": {
+            "name": "ERROR",
             "symbol": {
                 "bgcolor": "red",
                 "character": 63
