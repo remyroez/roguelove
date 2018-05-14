@@ -42,6 +42,7 @@ function PlayerSystem:keypressed(event)
     if update then
         for index, entity in pairs(self.targets) do
             local actor = entity:get('Actor')
+            actor:clear()
             actor:schedule(
                 function (entityActor)
                     self.eventManager:fireEvent(
@@ -56,6 +57,7 @@ function PlayerSystem:keypressed(event)
                             not love.keyboard.isDown('lctrl')
                         )
                     )
+                    return true
                 end
             )
         end

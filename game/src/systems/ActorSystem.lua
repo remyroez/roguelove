@@ -9,7 +9,7 @@ function System:initialize(scheduler)
     lovetoys.System.initialize(self)
 
     self.scheduler = scheduler
-    self.engine = rot.Engine(self.scheduler)
+    self.lockCount = 1
 end
 
 function System:requires()
@@ -18,19 +18,43 @@ end
 
 function System:update(dt)
     for index, entity in pairs(self.targets) do
-        self:add(entity:get('Actor'))
+        local actor = entity:get('Actor')
+        if not actor.added then
+            self:add(actor)
+            actor.added = true
+        end
     end
 
     self.active = false
 end
 
 function System:nextTurn()
-    self.engine:start()
+    self:start()
     self.active = true
 end
 
+function System:start()
+    return self:unlock()
+end
+
+function System:lock()
+    self.lockCount = self.lockCount + 1
+    return self
+end
+
+function System:unlock()
+    assert(self.lockCount > 0, 'Cannot unlock unlocked Engine')
+    self.lockCount = self.lockCount - 1
+    while self.lockCount < 1 do
+        local actor = self.scheduler:next()
+        if not actor then return self:lock() end
+        if actor:act() then return self:lock() end
+    end
+    return self
+end
+
 function System:add(actor)
-    self.scheduler:add(actor, false, actor:delay())
+    self.scheduler:add(actor, actor:repeating(), actor:delay())
 end
 
 function System:remove(actor)
