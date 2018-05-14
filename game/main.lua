@@ -41,6 +41,13 @@ function love.load()
         assetSystem = system
     end
     
+    -- behavior system
+    do
+        local system = systems.BehaviorSystem()
+        engine:addSystem(system)
+        engine.eventManager:addListener(events.NextTurn.name, system, system.nextTurn)
+    end
+
     -- actor system
     do
         local system = systems.ActorSystem(rot.Scheduler.Speed())
@@ -140,10 +147,11 @@ function love.load()
     do
         local entity = lovetoys.Entity()
 
-        local Actor, Position, Size, Layer, Displayable, Collider, Shadow, Light, View = lovetoys.Component.load {
-            'Actor', 'Position', 'Size', 'Layer', 'Displayable', 'Collider', 'Shadow', 'Light', 'View'
+        local Actor, Behavior, Position, Size, Layer, Displayable, Collider, Shadow, Light, View = lovetoys.Component.load {
+            'Actor', 'Behavior', 'Position', 'Size', 'Layer', 'Displayable', 'Collider', 'Shadow', 'Light', 'View'
         }
         entity:add(Actor(100))
+        entity:add(Behavior(engine))
         entity:add(Position(20, 10))
         entity:add(Size())
         entity:add(Layer(const.layer.actor))
@@ -161,6 +169,7 @@ function love.load()
         entity:get('Actor'):schedule(function () print('hoge 1') end, 30)
         entity:get('Actor'):schedule(function () print('hoge 2') end, 20)
         entity:get('Actor'):schedule(function () print('hoge 3') end, 10)
+        entity:get('Behavior'):gotoState('Wanderer')
 
         engine:addEntity(entity)
     end
