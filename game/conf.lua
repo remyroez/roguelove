@@ -4,7 +4,7 @@ if love.filesystem then
 	require 'rocks' ()
 	
 	-- src
-	love.filesystem.setRequirePath("src/?.lua;" .. love.filesystem.getRequirePath())
+	love.filesystem.setRequirePath("src/?.lua;src/?/init.lua;" .. love.filesystem.getRequirePath())
 
 	-- lib
 	love.filesystem.setRequirePath("lib/?;lib/?.lua;lib/?/init.lua;" .. love.filesystem.getRequirePath())

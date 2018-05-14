@@ -1,0 +1,14 @@
+
+local folderOfThisFile = (...) .. '.'
+
+return {
+    ActorSystem = require(folderOfThisFile ..'ActorSystem'),
+    AssetSystem = require(folderOfThisFile ..'AssetSystem'),
+    DisplaySystem = require(folderOfThisFile ..'DisplaySystem'),
+    LightSystem = require(folderOfThisFile ..'LightSystem'),
+    MapSystem = require(folderOfThisFile ..'MapSystem'),
+    MoveSystem = require(folderOfThisFile ..'MoveSystem'),
+    PlayerSystem = require(folderOfThisFile ..'PlayerSystem'),
+    ShadowSystem = require(folderOfThisFile ..'ShadowSystem'),
+    ViewSystem = require(folderOfThisFile ..'ViewSystem'),
+}

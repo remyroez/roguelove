@@ -12,44 +12,12 @@ lovetoys.initialize {
 }
 local rot = require 'rot'
 
-require 'components.Actor'
-require 'components.Collider'
-require 'components.Displayable'
-require 'components.Layer'
-require 'components.Light'
-require 'components.Map'
-require 'components.Player'
-require 'components.Position'
-require 'components.Shadow'
-require 'components.Size'
-require 'components.View'
-
-local ActorSystem = require 'systems.ActorSystem'
-local DisplaySystem = require 'systems.DisplaySystem'
-local LightSystem = require 'systems.LightSystem'
-local MapSystem = require 'systems.MapSystem'
-local MoveSystem = require 'systems.MoveSystem'
-local PlayerSystem = require 'systems.PlayerSystem'
-local ShadowSystem = require 'systems.ShadowSystem'
-local ViewSystem = require 'systems.ViewSystem'
-local AssetSystem = require 'systems.AssetSystem'
-
-local Collection = require 'events.Collection'
-local Flush = require 'events.Flush'
-local HitCheck = require 'events.HitCheck'
-local KeyPressed = require 'events.KeyPressed'
-local Move = require 'events.Move'
-local NextTurn = require 'events.NextTurn'
+local components = require 'components'
+local systems = require 'systems'
+local events = require 'events'
+local asset = require 'asset'
 
 local Terminal = require 'core.Terminal'
-
-local Json = require 'asset.Json'
-local Schema = require 'asset.Schema'
-
-local Asset = require 'asset.Asset'
-require 'asset.Tileset'
-require 'asset.Info'
-require 'asset.Object'
 
 local engine = nil
 
@@ -63,7 +31,7 @@ function love.load()
     -- asset system
     local assetSystem
     do
-        local system = AssetSystem()
+        local system = systems.AssetSystem()
         engine:addSystem(system)
         engine:stopSystem(system.class.name)
 
@@ -75,60 +43,60 @@ function love.load()
     
     -- actor system
     do
-        local system = ActorSystem(rot.Scheduler.Speed())
+        local system = systems.ActorSystem(rot.Scheduler.Speed())
         engine:addSystem(system)
         engine.eventManager:addListener(lovetoys.ComponentAdded.name, system, system.componentAdded)
         engine.eventManager:addListener(lovetoys.ComponentRemoved.name, system, system.componentRemoved)
-        engine.eventManager:addListener(NextTurn.name, system, system.nextTurn)
+        engine.eventManager:addListener(events.NextTurn.name, system, system.nextTurn)
     end
 
     -- player system
     do
-        local system = PlayerSystem(engine.eventManager)
+        local system = systems.PlayerSystem(engine.eventManager)
         engine:addSystem(system)
         engine:stopSystem(system.class.name)
-        engine.eventManager:addListener(KeyPressed.name, system, system.keypressed)
+        engine.eventManager:addListener(events.KeyPressed.name, system, system.keypressed)
     end
 
     -- move system
     do
-        local system = MoveSystem(engine.eventManager)
+        local system = systems.MoveSystem(engine.eventManager)
         engine:addSystem(system)
         engine:stopSystem(system.class.name)
-        engine.eventManager:addListener(Move.name, system, system.onMove)
-        engine.eventManager:addListener(HitCheck.name, system, system.onHitCheck)
+        engine.eventManager:addListener(events.Move.name, system, system.onMove)
+        engine.eventManager:addListener(events.HitCheck.name, system, system.onHitCheck)
     end
 
     -- map system
     do
-        engine:addSystem(MapSystem())
+        engine:addSystem(systems.MapSystem())
     end
     
     -- shadow system
     local shadowSystem = nil
     do
-        local system = ShadowSystem()
+        local system = systems.ShadowSystem()
         engine:addSystem(system)
-        engine.eventManager:addListener(Flush.name, system, system.flush)
+        engine.eventManager:addListener(events.Flush.name, system, system.flush)
         shadowSystem = system
     end
 
     -- light system
     do
-        local system = LightSystem(
+        local system = systems.LightSystem(
             rot.FOV.Precise:new(shadowSystem:PreciseLightPassCallback()),
             shadowSystem:PreciseLightPassCallback()
         )
         engine:addSystem(system)
-        engine.eventManager:addListener(Flush.name, system, system.flush)
-        engine.eventManager:addListener(Collection.name, system, system.onCollection)
+        engine.eventManager:addListener(events.Flush.name, system, system.flush)
+        engine.eventManager:addListener(events.Collection.name, system, system.onCollection)
     end
 
     -- view system
     do
-        local system = ViewSystem()
+        local system = systems.ViewSystem()
         engine:addSystem(system)
-        engine.eventManager:addListener(Flush.name, system, system.flush)
+        engine.eventManager:addListener(events.Flush.name, system, system.flush)
     end
 
     -- display system
@@ -136,7 +104,7 @@ function love.load()
         local tileset = assetSystem:get('tileset_simple_mood_ascii')
         tileset:load()
         
-        local system = DisplaySystem(engine, Terminal(tileset))
+        local system = systems.DisplaySystem(engine, Terminal(tileset))
         engine:addSystem(system, 'update')
         engine:addSystem(system, 'draw')
     end
@@ -254,6 +222,6 @@ function love.keypressed(key, scancode, isrepeat)
     elseif key == 'f5' then
         love.event.quit('restart')
     else
-        engine.eventManager:fireEvent(KeyPressed(key, scancode, isrepeat))
+        engine.eventManager:fireEvent(events.KeyPressed(key, scancode, isrepeat))
     end
 end
