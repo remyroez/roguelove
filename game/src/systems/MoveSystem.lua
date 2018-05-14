@@ -6,7 +6,7 @@ local Flush = require 'events.Flush'
 
 local MoveSystem = class('MoveSystem', lovetoys.System)
 
-local function isHit(
+MoveSystem.static.isHit = function (
     srcPosition, srcSize, srclayer, srcCollider,
     distPosition, distSize, distLayer, distCollider
 )
@@ -71,29 +71,14 @@ function MoveSystem:requires()
 end
 
 function MoveSystem:update(dt)
+    self.active = false
 end
 
 function MoveSystem:onMove(event)
     local hit = false
 
     if event.check then
-        for index, entity in pairs(self.targets) do
-            if event.id == entity.id then
-                -- equal entity
-            elseif isHit(
-                entity:get('Position'),
-                entity:get('Size'),
-                entity:get('Layer'),
-                entity:get('Collider'),
-                { x = event.position.x + event.x, y = event.position.y + event.y },
-                event.size,
-                event.layer,
-                event.collider
-            ) then
-                hit = true
-                break
-            end
-        end
+        hit = self:onHitCheck(event)
     end
 
     if hit then
@@ -105,6 +90,32 @@ function MoveSystem:onMove(event)
             self.eventManager:fireEvent(Flush())
         end
     end
+end
+
+function MoveSystem:onHitCheck(event)
+    local hit = false
+
+    for index, entity in pairs(self.targets) do
+        if event.id == entity.id then
+            -- equal entity
+        elseif MoveSystem.isHit(
+            entity:get('Position'),
+            entity:get('Size'),
+            entity:get('Layer'),
+            entity:get('Collider'),
+            { x = event.position.x + event.x, y = event.position.y + event.y },
+            event.size,
+            event.layer,
+            event.collider
+        ) then
+            hit = true
+            break
+        end
+    end
+
+    event.result = hit
+
+    return hit
 end
 
 return MoveSystem

@@ -36,6 +36,7 @@ local AssetSystem = require 'systems.AssetSystem'
 
 local Collection = require 'events.Collection'
 local Flush = require 'events.Flush'
+local HitCheck = require 'events.HitCheck'
 local KeyPressed = require 'events.KeyPressed'
 local Move = require 'events.Move'
 local NextTurn = require 'events.NextTurn'
@@ -95,6 +96,7 @@ function love.load()
         engine:addSystem(system)
         engine:stopSystem(system.class.name)
         engine.eventManager:addListener(Move.name, system, system.onMove)
+        engine.eventManager:addListener(HitCheck.name, system, system.onHitCheck)
     end
 
     -- map system
