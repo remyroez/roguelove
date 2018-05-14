@@ -1,4 +1,6 @@
 
+require 'autobatch'
+
 local const = require 'const'
 local util = require 'util'
 
