@@ -23,17 +23,5 @@ end
 
 function Wanderer:action(entity)
     local newPos = pos[math.random(#pos)]
-    return function ()
-        self:fireEvent(
-            events.Move(
-                entity.id,
-                entity:get('Position'),
-                entity:get('Size'),
-                entity:get('Layer'),
-                entity:get('Collider'),
-                newPos[1],
-                newPos[2]
-            )
-        )
-    end
+    return function () self:moveEntity(entity) end
 end
