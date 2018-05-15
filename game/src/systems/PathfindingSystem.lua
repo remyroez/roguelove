@@ -10,7 +10,7 @@ function System:initialize()
 end
 
 function System:requires()
-    return { 'Position', 'Collider' }
+    return { 'Position', 'Collider', 'Size' }
 end
 
 function System:update(dt)
@@ -25,7 +25,11 @@ function System:PassableCallback(id)
                 -- skip
             else
                 local position = entity:get('Position')
-                if entity:get('Collider'):getCollision(x, y) then
+                local size = entity:get('Size')
+                local left, top = x, y--x - position.x, y - position.y
+                if not entity:get('Collider'):getCollision(left, top) then
+                    -- skip
+                else
                     passable = false
                     break
                 end
@@ -40,7 +44,18 @@ function System:onPathfinding(event)
     if not event.pathfinder or (event.pathfinder._toX ~= event.toX) or (event.pathfinder._toY ~= event.toY) then
         event.pathfinder = rot.Path.AStar(event.toX, event.toY, self:PassableCallback(event.id))
     end
-    event.pathfinder:compute(event.fromX, event.fromY, function (x, y) table.insert(paths, {x, y}) end)
+    if event.toX <= 1 then
+        -- 
+    elseif event.toY <= 1 then
+        -- 
+    elseif event.fromX <= 1 then
+        -- 
+    elseif event.fromY <= 1 then
+        -- 
+    else
+        --print(event.toX, event.toY, event.fromX, event.fromY)
+        event.pathfinder:compute(event.fromX, event.fromY, function (x, y) table.insert(paths, {x, y}) end)
+    end
     event.result = paths
 end
 

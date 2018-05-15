@@ -156,13 +156,13 @@ function love.load()
     end
 
     -- other actor
-    do
+    for i = 1, 1 do
         local entity = lovetoys.Entity()
 
         entity:add(components.Tag { 'legion' } )
         entity:add(components.Actor(100))
         entity:add(components.Behavior(engine))
-        entity:add(components.Position(20, 10))
+        entity:add(components.Position(math.random(10, 70), math.random(10, 14)))
         entity:add(components.Size())
         entity:add(components.Layer(const.layer.actor))
         entity:add(components.Displayable())
@@ -180,6 +180,7 @@ function love.load()
         --entity:get('Actor'):schedule(function () print('hoge 2') end, 20)
         --entity:get('Actor'):schedule(function () print('hoge 3') end, 10)
         entity:get('Behavior'):gotoState('predator')
+        --entity:get('Behavior'):gotoState('Wanderer')
 
         engine:addEntity(entity)
     end
