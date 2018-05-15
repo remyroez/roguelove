@@ -29,30 +29,4 @@ function MapSystem:update(dt)
     end
 end
 
-function MapSystem:PassableCallback()
-    return function (x, y)
-        local passable = true
-        for index, entity in pairs(self.targets) do
-            if entity:get('Collider'):getCollision(x, y) then
-                passable = false
-                break
-            end
-        end
-        return passable
-    end
-end
-
-function MapSystem:onPathfinding(event)
-    event.result = self:pathfinding(event.x, event.y)
-end
-
-function MapSystem:pathfinding(x, y)
-    local paths = {}
-    if not self.pathfinder then
-        self.pathfinder = rot.Path.AStar(x, y, self:PassableCallback())
-    end
-    self.pathfinder:compute(x, y, function (x, y) table.insert(paths, {x, y}) end)
-    return paths
-end
-
 return MapSystem

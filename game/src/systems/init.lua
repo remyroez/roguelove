@@ -9,6 +9,7 @@ return {
     LightSystem = require(folderOfThisFile ..'LightSystem'),
     MapSystem = require(folderOfThisFile ..'MapSystem'),
     MoveSystem = require(folderOfThisFile ..'MoveSystem'),
+    PathfindingSystem = require(folderOfThisFile ..'PathfindingSystem'),
     PlayerSystem = require(folderOfThisFile ..'PlayerSystem'),
     ShadowSystem = require(folderOfThisFile ..'ShadowSystem'),
     TagSystem = require(folderOfThisFile ..'TagSystem'),
