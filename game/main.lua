@@ -86,6 +86,13 @@ function love.load()
         engine:addSystem(systems.MapSystem())
     end
     
+    -- pathfinding system
+    do
+        local system = systems.PathfindingSystem()
+        engine:addSystem(system)
+        engine.eventManager:addListener(events.Pathfinding.name, system, system.onPathfinding)
+    end
+    
     -- shadow system
     local shadowSystem = nil
     do
@@ -169,10 +176,10 @@ function love.load()
         entity:get('Collider'):setCollision(object:collision())
         entity:get('Shadow'):setShade(object:shade())
         entity:get('Light'):setColor(rot.Color.fromString('purple'))
-        entity:get('Actor'):schedule(function () print('hoge 1') end, 30)
-        entity:get('Actor'):schedule(function () print('hoge 2') end, 20)
-        entity:get('Actor'):schedule(function () print('hoge 3') end, 10)
-        entity:get('Behavior'):gotoState('Wanderer')
+        --entity:get('Actor'):schedule(function () print('hoge 1') end, 30)
+        --entity:get('Actor'):schedule(function () print('hoge 2') end, 20)
+        --entity:get('Actor'):schedule(function () print('hoge 3') end, 10)
+        entity:get('Behavior'):gotoState('predator')
 
         engine:addEntity(entity)
     end

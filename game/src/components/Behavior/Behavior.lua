@@ -2,6 +2,8 @@
 local lovetoys = require 'lovetoys.lovetoys'
 local Stateful = require 'stateful'
 
+local events = require 'events'
+
 local Component = lovetoys.Component.create('Behavior')
 Component:include(Stateful)
 

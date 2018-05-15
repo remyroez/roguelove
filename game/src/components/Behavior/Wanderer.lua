@@ -23,5 +23,5 @@ end
 
 function Wanderer:action(entity)
     local newPos = pos[math.random(#pos)]
-    return function () self:moveEntity(entity) end
+    return function () self:moveEntity(entity, newPos[1], newPos[2]) end
 end
