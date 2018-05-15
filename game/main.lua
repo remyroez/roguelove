@@ -41,6 +41,13 @@ function love.load()
         assetSystem = system
     end
     
+    -- tag system
+    do
+        local system = systems.TagSystem()
+        engine:addSystem(system)
+        engine.eventManager:addListener(events.FindEntitiesWithTag.name, system, system.onFindEntitiesWithTag)
+    end
+
     -- behavior system
     do
         local system = systems.BehaviorSystem()
@@ -120,19 +127,17 @@ function love.load()
     do
         local entity = lovetoys.Entity()
 
-        local Player, Actor, Position, Size, Layer, Displayable, Collider, Shadow, Light, View = lovetoys.Component.load {
-            'Player', 'Actor', 'Position', 'Size', 'Layer', 'Displayable', 'Collider', 'Shadow', 'Light', 'View'
-        }
-        entity:add(Player())
-        entity:add(Actor(100))
-        entity:add(Position(10, 10))
-        entity:add(Size())
-        entity:add(Layer(const.layer.actor))
-        entity:add(Displayable())
-        entity:add(Collider())
-        entity:add(Shadow())
-        entity:add(Light())
-        entity:add(View(rot.FOV.Precise:new(shadowSystem:PreciseLightPassCallback()), 10))
+        entity:add(components.Player())
+        entity:add(components.Tag { 'player' } )
+        entity:add(components.Actor(100))
+        entity:add(components.Position(10, 10))
+        entity:add(components.Size())
+        entity:add(components.Layer(const.layer.actor))
+        entity:add(components.Displayable())
+        entity:add(components.Collider())
+        entity:add(components.Shadow())
+        entity:add(components.Light())
+        entity:add(components.View(rot.FOV.Precise:new(shadowSystem:PreciseLightPassCallback()), 10))
 
         local object = assetSystem:get('object_core_player')
         entity:get('Displayable'):setSymbol(object:symbol())
@@ -147,18 +152,16 @@ function love.load()
     do
         local entity = lovetoys.Entity()
 
-        local Actor, Behavior, Position, Size, Layer, Displayable, Collider, Shadow, Light, View = lovetoys.Component.load {
-            'Actor', 'Behavior', 'Position', 'Size', 'Layer', 'Displayable', 'Collider', 'Shadow', 'Light', 'View'
-        }
-        entity:add(Actor(100))
-        entity:add(Behavior(engine))
-        entity:add(Position(20, 10))
-        entity:add(Size())
-        entity:add(Layer(const.layer.actor))
-        entity:add(Displayable())
-        entity:add(Collider())
-        entity:add(Shadow())
-        entity:add(Light())
+        entity:add(components.Tag { 'legion' } )
+        entity:add(components.Actor(100))
+        entity:add(components.Behavior(engine))
+        entity:add(components.Position(20, 10))
+        entity:add(components.Size())
+        entity:add(components.Layer(const.layer.actor))
+        entity:add(components.Displayable())
+        entity:add(components.Collider())
+        entity:add(components.Shadow())
+        entity:add(components.Light())
         --entity:add(View(rot.FOV.Precise:new(shadowSystem:PreciseLightPassCallback()), 10))
 
         local object = assetSystem:get('object_core_player')
