@@ -11,5 +11,6 @@ return {
     MoveSystem = require(folderOfThisFile ..'MoveSystem'),
     PlayerSystem = require(folderOfThisFile ..'PlayerSystem'),
     ShadowSystem = require(folderOfThisFile ..'ShadowSystem'),
+    TagSystem = require(folderOfThisFile ..'TagSystem'),
     ViewSystem = require(folderOfThisFile ..'ViewSystem'),
 }
