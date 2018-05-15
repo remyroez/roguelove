@@ -9,6 +9,7 @@ local events = {
     KeyPressed = require(folderOfThisFile ..'KeyPressed'),
     Move = require(folderOfThisFile ..'Move'),
     NextTurn = require(folderOfThisFile ..'NextTurn'),
+    Pathfinding = require(folderOfThisFile ..'Pathfinding'),
 }
 
 function events.fireEvent(engine, event)
@@ -42,6 +43,10 @@ end
 
 function events.fireNextTurn(engine, ...)
     return events.fireEvent(engine, events.NextTurn(...))
+end
+
+function events.firePathfinding(engine, ...)
+    return events.fireEvent(engine, events.Pathfinding(...))
 end
 
 return events
