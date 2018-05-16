@@ -6,7 +6,7 @@ local Flush = require 'events.Flush'
 
 local MoveSystem = class('MoveSystem', lovetoys.System)
 
-local function isHit(
+MoveSystem.static.isHit = function (
     srcPosition, srcSize, srclayer, srcCollider,
     distPosition, distSize, distLayer, distCollider
 )
@@ -19,19 +19,19 @@ local function isHit(
 
     if distLayer:priority() < srclayer:priority() then
         -- under layer
-        print("distLayer:priority() < srclayer:priority()", distLayer:priority(), srclayer:priority())
+        --print("distLayer:priority() < srclayer:priority()", distLayer:priority(), srclayer:priority())
     elseif distLeft > srcRight then
         -- no hit
-        print("distLeft > srcRight", distLeft, srcRight)
+        --print("distLeft > srcRight", distLeft, srcRight)
     elseif distTop > srcBottom then
         -- no hit
-        print("distTop > srcBottom", distTop, srcBottom)
+        --print("distTop > srcBottom", distTop, srcBottom)
     elseif distRight < srcLeft then
         -- no hit
-        print("distRight < srcLeft", distRight, srcLeft)
+        --print("distRight < srcLeft", distRight, srcLeft)
     elseif distBottom < srcTop then
         -- no hit
-        print("distBottom < srcTop", distBottom, srcTop)
+        --print("distBottom < srcTop", distBottom, srcTop)
     else
         local left = math.min(srcLeft, distLeft)
         local top = math.min(srcTop, distTop)
@@ -71,29 +71,14 @@ function MoveSystem:requires()
 end
 
 function MoveSystem:update(dt)
+    self.active = false
 end
 
 function MoveSystem:onMove(event)
     local hit = false
 
     if event.check then
-        for index, entity in pairs(self.targets) do
-            if event.id == entity.id then
-                -- equal entity
-            elseif isHit(
-                entity:get('Position'),
-                entity:get('Size'),
-                entity:get('Layer'),
-                entity:get('Collider'),
-                { x = event.position.x + event.x, y = event.position.y + event.y },
-                event.size,
-                event.layer,
-                event.collider
-            ) then
-                hit = true
-                break
-            end
-        end
+        hit = self:onHitCheck(event)
     end
 
     if hit then
@@ -105,6 +90,32 @@ function MoveSystem:onMove(event)
             self.eventManager:fireEvent(Flush())
         end
     end
+end
+
+function MoveSystem:onHitCheck(event)
+    local hit = false
+
+    for index, entity in pairs(self.targets) do
+        if event.id == entity.id then
+            -- equal entity
+        elseif MoveSystem.isHit(
+            entity:get('Position'),
+            entity:get('Size'),
+            entity:get('Layer'),
+            entity:get('Collider'),
+            { x = event.position.x + event.x, y = event.position.y + event.y },
+            event.size,
+            event.layer,
+            event.collider
+        ) then
+            hit = true
+            break
+        end
+    end
+
+    event.result = hit
+
+    return hit
 end
 
 return MoveSystem

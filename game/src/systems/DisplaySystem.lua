@@ -42,6 +42,7 @@ function DisplaySystem:updateSymbolMap(map, visionMap, seenMap)
     local dirty = false
 
     local lightMap = self:getLightMap()
+    local darkColor = rot.Color.fromString('black')
 
     for index, entity in pairs(self.targets) do
         local position = entity:get('Position')
@@ -59,40 +60,37 @@ function DisplaySystem:updateSymbolMap(map, visionMap, seenMap)
                     local symbol = displayable:getSymbol(x, y)
                     local vision = util.getMap(visionMap, left, top)
                     local light = util.getMap(lightMap, left, top)
-                    local newSymbol = {}
-                    newSymbol.character = symbol.character
+                    local newSymbol
                     if vision then
-                        if symbol.fgcolor then
-                            newSymbol.fgcolor = rot.Color.interpolateHSL(symbol.fgcolor, rot.Color.fromString('black'), (1 - vision) * .5)
-                            if layer:get() ~= const.layer.map then
-                                -- skip light
-                            elseif light then
+                        newSymbol = {
+                            character = symbol.character,
+                            fgcolor = (symbol.fgcolor and rot.Color.interpolateHSL(symbol.fgcolor, darkColor, (1 - vision) * .5) or nil),
+                            bgcolor = (symbol.bgcolor and rot.Color.interpolate(symbol.bgcolor, darkColor, (1 - vision) * .5) or nil)
+                        }
+                        if layer:get() ~= const.layer.map then
+                            -- skip light
+                        elseif not light then
+                            -- no light
+                        else
+                            if newSymbol.fgcolor then
                                 newSymbol.fgcolor = rot.Color.add(newSymbol.fgcolor, light)
                             end
-                        end
-                        if symbol.bgcolor then
-                            newSymbol.bgcolor = rot.Color.interpolate(symbol.bgcolor, rot.Color.fromString('black'), (1 - vision) * .5)
-                            if light then
+                            if newSymbol.bgcolor then
                                 newSymbol.bgcolor = rot.Color.add(newSymbol.bgcolor, light)
                             end
                         end
+                    elseif layer:get() ~= const.layer.map then
+                        -- no display
                     else
-                        if symbol.fgcolor then
-                            newSymbol.fgcolor = rot.Color.interpolateHSL(symbol.fgcolor, rot.Color.fromString('black'), .5)
-
-                        end
-                        if symbol.bgcolor then
-                            newSymbol.bgcolor = rot.Color.interpolate(symbol.bgcolor, rot.Color.fromString('black'), .5)
-                        end
+                        newSymbol = {
+                            character = symbol.character,
+                            fgcolor = (symbol.fgcolor and rot.Color.interpolateHSL(symbol.fgcolor, darkColor, .5) or nil),
+                            bgcolor = (symbol.bgcolor and rot.Color.interpolate(symbol.bgcolor, darkColor, .5) or nil)
+                        }
                     end
-                    symbol = newSymbol
-                    util.setMap(
-                        map,
-                        symbol,
-                        left,
-                        top,
-                        layer:priority()
-                    )
+                    if newSymbol then
+                        util.setMap(map, newSymbol, left, top, layer:priority())
+                    end
                 end
             end
         end
@@ -120,10 +118,10 @@ function DisplaySystem:updateViewMap(visionMap, seenMap)
         local view = entity:get('View')
 
         for key, value in pairs(view.visionMap) do
-            visionMap[key] = (visionMap[key] == nil) and value or math.max(visionMap[key], value)
+            visionMap[key] = math.max(visionMap[key] or 0, value)
         end
         for key, value in pairs(view.seenMap) do
-            seenMap[key] = (seenMap[key] == nil) and value or math.max(seenMap[key], value)
+            seenMap[key] = seenMap[key] or value
         end
 
         if view.dirty['DisplaySystem'] == false then

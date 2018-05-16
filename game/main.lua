@@ -1,4 +1,6 @@
 
+require 'autobatch'
+
 local const = require 'const'
 local util = require 'util'
 
@@ -10,40 +12,12 @@ lovetoys.initialize {
 }
 local rot = require 'rot'
 
-require 'components.Collider'
-require 'components.Displayable'
-require 'components.Layer'
-require 'components.Light'
-require 'components.Map'
-require 'components.Player'
-require 'components.Position'
-require 'components.Shadow'
-require 'components.Size'
-require 'components.View'
-
-local DisplaySystem = require 'systems.DisplaySystem'
-local LightSystem = require 'systems.LightSystem'
-local MapSystem = require 'systems.MapSystem'
-local MoveSystem = require 'systems.MoveSystem'
-local PlayerSystem = require 'systems.PlayerSystem'
-local ShadowSystem = require 'systems.ShadowSystem'
-local ViewSystem = require 'systems.ViewSystem'
-local AssetSystem = require 'systems.AssetSystem'
-
-local Collection = require 'events.Collection'
-local Flush = require 'events.Flush'
-local KeyPressed = require 'events.KeyPressed'
-local Move = require 'events.Move'
+local components = require 'components'
+local systems = require 'systems'
+local events = require 'events'
+local asset = require 'asset'
 
 local Terminal = require 'core.Terminal'
-
-local Json = require 'asset.Json'
-local Schema = require 'asset.Schema'
-
-local Asset = require 'asset.Asset'
-require 'asset.Tileset'
-require 'asset.Info'
-require 'asset.Object'
 
 local engine = nil
 
@@ -57,7 +31,7 @@ function love.load()
     -- asset system
     local assetSystem
     do
-        local system = AssetSystem()
+        local system = systems.AssetSystem()
         engine:addSystem(system)
         engine:stopSystem(system.class.name)
 
@@ -66,53 +40,84 @@ function love.load()
 
         assetSystem = system
     end
+    
+    -- tag system
+    do
+        local system = systems.TagSystem()
+        engine:addSystem(system)
+        engine.eventManager:addListener(events.FindEntitiesWithTag.name, system, system.onFindEntitiesWithTag)
+    end
+
+    -- behavior system
+    do
+        local system = systems.BehaviorSystem()
+        engine:addSystem(system)
+        engine.eventManager:addListener(events.NextTurn.name, system, system.nextTurn)
+    end
+
+    -- actor system
+    do
+        local system = systems.ActorSystem(rot.Scheduler.Speed())
+        engine:addSystem(system)
+        engine.eventManager:addListener(lovetoys.ComponentAdded.name, system, system.componentAdded)
+        engine.eventManager:addListener(lovetoys.ComponentRemoved.name, system, system.componentRemoved)
+        engine.eventManager:addListener(events.NextTurn.name, system, system.nextTurn)
+    end
 
     -- player system
     do
-        local system = PlayerSystem(engine.eventManager)
+        local system = systems.PlayerSystem(engine.eventManager)
         engine:addSystem(system)
         engine:stopSystem(system.class.name)
-        engine.eventManager:addListener(KeyPressed.name, system, system.keypressed)
+        engine.eventManager:addListener(events.KeyPressed.name, system, system.keypressed)
     end
 
     -- move system
     do
-        local system = MoveSystem(engine.eventManager)
+        local system = systems.MoveSystem(engine.eventManager)
         engine:addSystem(system)
         engine:stopSystem(system.class.name)
-        engine.eventManager:addListener(Move.name, system, system.onMove)
+        engine.eventManager:addListener(events.Move.name, system, system.onMove)
+        engine.eventManager:addListener(events.HitCheck.name, system, system.onHitCheck)
     end
 
     -- map system
     do
-        engine:addSystem(MapSystem())
+        engine:addSystem(systems.MapSystem())
+    end
+    
+    -- pathfinding system
+    do
+        local system = systems.PathfindingSystem()
+        engine:addSystem(system)
+        engine.eventManager:addListener(events.Pathfinding.name, system, system.onPathfinding)
     end
     
     -- shadow system
     local shadowSystem = nil
     do
-        local system = ShadowSystem()
+        local system = systems.ShadowSystem()
         engine:addSystem(system)
-        engine.eventManager:addListener(Flush.name, system, system.flush)
+        engine.eventManager:addListener(events.Flush.name, system, system.flush)
         shadowSystem = system
     end
 
     -- light system
     do
-        local system = LightSystem(
+        local system = systems.LightSystem(
             rot.FOV.Precise:new(shadowSystem:PreciseLightPassCallback()),
             shadowSystem:PreciseLightPassCallback()
         )
         engine:addSystem(system)
-        engine.eventManager:addListener(Flush.name, system, system.flush)
-        engine.eventManager:addListener(Collection.name, system, system.onCollection)
+        engine.eventManager:addListener(events.Flush.name, system, system.flush)
+        engine.eventManager:addListener(events.Collection.name, system, system.onCollection)
     end
 
     -- view system
     do
-        local system = ViewSystem()
+        local system = systems.ViewSystem()
         engine:addSystem(system)
-        engine.eventManager:addListener(Flush.name, system, system.flush)
+        engine.eventManager:addListener(events.Flush.name, system, system.flush)
     end
 
     -- display system
@@ -120,7 +125,7 @@ function love.load()
         local tileset = assetSystem:get('tileset_simple_mood_ascii')
         tileset:load()
         
-        local system = DisplaySystem(engine, Terminal(tileset))
+        local system = systems.DisplaySystem(engine, Terminal(tileset))
         engine:addSystem(system, 'update')
         engine:addSystem(system, 'draw')
     end
@@ -129,24 +134,53 @@ function love.load()
     do
         local entity = lovetoys.Entity()
 
-        local Player, Position, Size, Layer, Displayable, Collider, Shadow, Light, View = lovetoys.Component.load {
-            'Player', 'Position', 'Size', 'Layer', 'Displayable', 'Collider', 'Shadow', 'Light', 'View'
-        }
-        entity:add(Player())
-        entity:add(Position(10, 10))
-        entity:add(Size())
-        entity:add(Layer(const.layer.actor))
-        entity:add(Displayable())
-        entity:add(Collider())
-        entity:add(Shadow())
-        entity:add(Light())
-        entity:add(View(rot.FOV.Precise:new(shadowSystem:PreciseLightPassCallback()), 10))
+        entity:add(components.Player())
+        entity:add(components.Tag { 'player' } )
+        entity:add(components.Actor(100))
+        entity:add(components.Position(10, 10))
+        entity:add(components.Size())
+        entity:add(components.Layer(const.layer.actor))
+        entity:add(components.Displayable())
+        entity:add(components.Collider())
+        entity:add(components.Shadow())
+        entity:add(components.Light())
+        entity:add(components.View(rot.FOV.Precise:new(shadowSystem:PreciseLightPassCallback()), 10))
 
         local object = assetSystem:get('object_core_player')
         entity:get('Displayable'):setSymbol(object:symbol())
         entity:get('Collider'):setCollision(object:collision())
         entity:get('Shadow'):setShade(object:shade())
         entity:get('Light'):setColor(rot.Color.fromString('goldenrod'))
+
+        engine:addEntity(entity)
+    end
+
+    -- other actor
+    for i = 1, 1 do
+        local entity = lovetoys.Entity()
+
+        entity:add(components.Tag { 'legion' } )
+        entity:add(components.Actor(100))
+        entity:add(components.Behavior(engine))
+        entity:add(components.Position(math.random(10, 70), math.random(10, 14)))
+        entity:add(components.Size())
+        entity:add(components.Layer(const.layer.actor))
+        entity:add(components.Displayable())
+        entity:add(components.Collider())
+        entity:add(components.Shadow())
+        entity:add(components.Light())
+        --entity:add(View(rot.FOV.Precise:new(shadowSystem:PreciseLightPassCallback()), 10))
+
+        local object = assetSystem:get('object_core_player')
+        entity:get('Displayable'):setSymbol(object:symbol())
+        entity:get('Collider'):setCollision(object:collision())
+        entity:get('Shadow'):setShade(object:shade())
+        entity:get('Light'):setColor(rot.Color.fromString('purple'))
+        --entity:get('Actor'):schedule(function () print('hoge 1') end, 30)
+        --entity:get('Actor'):schedule(function () print('hoge 2') end, 20)
+        --entity:get('Actor'):schedule(function () print('hoge 3') end, 10)
+        entity:get('Behavior'):gotoState('predator')
+        --entity:get('Behavior'):gotoState('Wanderer')
 
         engine:addEntity(entity)
     end
@@ -208,6 +242,6 @@ function love.keypressed(key, scancode, isrepeat)
     elseif key == 'f5' then
         love.event.quit('restart')
     else
-        engine.eventManager:fireEvent(KeyPressed(key, scancode, isrepeat))
+        engine.eventManager:fireEvent(events.KeyPressed(key, scancode, isrepeat))
     end
 end

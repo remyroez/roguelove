@@ -7,6 +7,7 @@ local MapSystem = class('MapSystem', lovetoys.System)
 
 function MapSystem:initialize()
     lovetoys.System.initialize(self)
+    self.pathfinder = nil
 end
 
 function MapSystem:requires()

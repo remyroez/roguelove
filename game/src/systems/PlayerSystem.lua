@@ -3,6 +3,8 @@ local class = require 'middleclass'
 local lovetoys = require 'lovetoys.lovetoys'
 
 local Move = require 'events.Move'
+local HitCheck = require 'events.HitCheck'
+local NextTurn = require 'events.NextTurn'
 
 local PlayerSystem = class('PlayerSystem', lovetoys.System)
 
@@ -12,7 +14,7 @@ function PlayerSystem:initialize(eventManager)
 end
 
 function PlayerSystem:requires()
-    return { 'Position', 'Size', 'Layer', 'Collider', 'Player' }
+    return { 'Player', 'Actor', 'Position', 'Size', 'Layer', 'Collider' }
 end
 
 function PlayerSystem:update(dt)
@@ -39,19 +41,54 @@ function PlayerSystem:keypressed(event)
     end
     
     if update then
+        local hitCheck = false
+        local check = not love.keyboard.isDown('lctrl')
+        local fire = true
+        local fired = false
         for index, entity in pairs(self.targets) do
-            self.eventManager:fireEvent(
-                Move(
+            fire = true
+            if check and hitCheck then
+                local event = HitCheck(
                     entity.id,
                     entity:get('Position'),
                     entity:get('Size'),
                     entity:get('Layer'),
                     entity:get('Collider'),
                     newPos[1],
-                    newPos[2],
-                    not love.keyboard.isDown('lctrl')
+                    newPos[2]
                 )
-            )
+                self.eventManager:fireEvent(event)
+                if event.result then
+                    fire = false
+                end
+            end
+
+            if fire then
+                local actor = entity:get('Actor')
+                actor:clear()
+                actor:schedule(
+                    function (entityActor)
+                        self.eventManager:fireEvent(
+                            Move(
+                                entity.id,
+                                entity:get('Position'),
+                                entity:get('Size'),
+                                entity:get('Layer'),
+                                entity:get('Collider'),
+                                newPos[1],
+                                newPos[2],
+                                check
+                            )
+                        )
+                        return true
+                    end
+                )
+                fired = true
+            end
+        end
+
+        if fired then
+            self.eventManager:fireEvent(NextTurn())
         end
     end
 end
