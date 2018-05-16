@@ -42,7 +42,8 @@ end
 function System:onPathfinding(event)
     local paths = {}
     if not event.pathfinder or (event.pathfinder._toX ~= event.toX) or (event.pathfinder._toY ~= event.toY) then
-        event.pathfinder = rot.Path.AStar(event.toX, event.toY, self:PassableCallback(event.id))
+        local algorithm = event.algorithm or 'AStar'
+        event.pathfinder = rot.Path[algorithm](event.toX, event.toY, self:PassableCallback(event.id))
     end
     if event.toX <= 1 then
         -- 

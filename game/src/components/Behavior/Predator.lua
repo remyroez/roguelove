@@ -11,6 +11,7 @@ function Predator:enteredState()
         paths = {},
         pathfinding = events.Pathfinding()
     }
+    self.predator.pathfinding.algorithm = events.Pathfinding.dijkstra
 end
 
 function Predator:action(entity)
