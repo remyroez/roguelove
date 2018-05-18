@@ -9,11 +9,11 @@ function Component:initialize(stats)
     self.stats = stats or {}
 end
 
-function Component:onCollision(other, action)
-    if self.stats.hp then
-        self.stats.hp = self.stats.hp - 10
-    end
-    print('hp', self.stats.hp)
+function Component:onCollision(me, other, action)
+    local myAttribute, otherAttribute = util.gets('Attribute', me, other)
+    print('on', action)
+    print('me', me.id, myAttribute and myAttribute.stats.hp or nil)
+    print('other', other.id, otherAttribute and otherAttribute.stats.hp or nil)
 end
 
 return Component

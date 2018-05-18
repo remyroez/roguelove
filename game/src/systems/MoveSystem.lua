@@ -90,11 +90,13 @@ function MoveSystem:onMove(event)
         end
     elseif not other then
         -- hit with unknown
+    elseif not other:get('Attribute') then
+        -- no attribute
     else
         -- can't move
-        local statistic = other:get('Attribute')
-        if statistic then
-            statistic:onCollision(event.entity)
+        local attribute = event.entity:get('Attribute')
+        if attribute then
+            attribute:onCollision(event.entity, other, 'move')
         end
     end
 end
