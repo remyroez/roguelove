@@ -37,10 +37,22 @@ function Component:triggers()
     return self.asset and self.asset:triggers() or {}
 end
 
-function Component:onCollision(me, other, action)
+function Component:onCollisionTo(me, other, action)
     local myAttribute, otherAttribute = util.gets('Attribute', me, other)
-    otherAttribute:hp(otherAttribute:hp() - 10)
-    print('on', action)
+    print('onCollisionTo', action, me.id .. ' -> ' .. other.id)
+    otherAttribute:onCollisionFrom(other, me)
+end
+
+function Component:onCollisionFrom(me, other, action)
+    local myAttribute, otherAttribute = util.gets('Attribute', me, other)
+    print('onCollisionFrom', action, me.id .. ' -> ' .. other.id)
+    otherAttribute:onDamage(me, other)
+end
+
+function Component:onDamage(me, other)
+    local myAttribute, otherAttribute = util.gets('Attribute', me, other)
+    myAttribute:hp(myAttribute:hp() - 10)
+    print('onDamage', me.id .. ' -> ' .. other.id)
     print('me',
         me.id,
         myAttribute:hp(),

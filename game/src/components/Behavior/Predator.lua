@@ -34,21 +34,25 @@ function Predator:action(entity)
             end
         end
         local pathfinding = self.predator.pathfinding
-        if pathfinding.toX ~= toX then
-            pathfinding.toX = toX
-            retarget = true
-        end
-        if pathfinding.toY ~= toY then
-            pathfinding.toY = toY
-            retarget = true
-        end
-        if pathfinding.fromX ~= fromX then
-            pathfinding.fromX = fromX
-            retarget = true
-        end
-        if pathfinding.fromY ~= fromY then
-            pathfinding.fromY = fromY
-            retarget = true
+        if not toX or not toY or not fromX or not fromY then
+            -- error
+        else
+            if pathfinding.toX ~= toX then
+                pathfinding.toX = toX
+                retarget = true
+            end
+            if pathfinding.toY ~= toY then
+                pathfinding.toY = toY
+                retarget = true
+            end
+            if pathfinding.fromX ~= fromX then
+                pathfinding.fromX = fromX
+                retarget = true
+            end
+            if pathfinding.fromY ~= fromY then
+                pathfinding.fromY = fromY
+                retarget = true
+            end
         end
     end
 

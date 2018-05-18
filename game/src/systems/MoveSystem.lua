@@ -96,7 +96,7 @@ function MoveSystem:onMove(event)
         -- can't move
         local attribute = event.entity:get('Attribute')
         if attribute then
-            attribute:onCollision(event.entity, other, 'move')
+            attribute:onCollisionTo(event.entity, other, 'move')
         end
     end
 end
