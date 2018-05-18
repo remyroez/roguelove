@@ -48,6 +48,13 @@ function love.load()
         engine.eventManager:addListener(events.FindEntitiesWithTag.name, system, system.onFindEntitiesWithTag)
     end
 
+    -- attribute system
+    do
+        local system = systems.AttributeSystem(engine)
+        engine:addSystem(system)
+        engine.eventManager:addListener(events.NextTurn.name, system, system.nextTurn)
+    end
+
     -- behavior system
     do
         local system = systems.BehaviorSystem()
@@ -79,13 +86,6 @@ function love.load()
         engine:stopSystem(system.class.name)
         engine.eventManager:addListener(events.Move.name, system, system.onMove)
         engine.eventManager:addListener(events.HitCheck.name, system, system.onHitCheck)
-    end
-
-    -- attribute system
-    do
-        local system = systems.AttributeSystem(engine)
-        engine:addSystem(system)
-        engine.eventManager:addListener(events.NextTurn.name, system, system.nextTurn)
     end
 
     -- map system
@@ -198,9 +198,6 @@ function love.load()
     do
         local entity = lovetoys.Entity()
 
-        local Map, Position, Size, Layer, Displayable, Collider, Shadow, Light = lovetoys.Component.load {
-            'Map', 'Position', 'Size', 'Layer', 'Displayable', 'Collider', 'Shadow', 'Light'
-        }
         local w = 80
         local h = 24
         local callback = function (entity)
@@ -220,14 +217,14 @@ function love.load()
                 entity:get('Shadow'):setShade(obj:shade(), x, y)
             end
         end
-        entity:add(Map(rot.Map.Brogue(w, h), callback))
-        entity:add(Position())
-        entity:add(Size(w, h))
-        entity:add(Layer(const.layer.map))
-        entity:add(Displayable())
-        entity:add(Collider())
-        entity:add(Shadow())
-        entity:add(Light())
+        entity:add(components.Map(rot.Map.Brogue(w, h), callback))
+        entity:add(components.Position())
+        entity:add(components.Size(w, h))
+        entity:add(components.Layer(const.layer.map))
+        entity:add(components.Displayable())
+        entity:add(components.Collider())
+        entity:add(components.Shadow())
+        entity:add(components.Light())
         
         entity:get('Light'):setColor(rot.Color.fromString('red'), 40, 15)
         entity:get('Light'):setColor(rot.Color.fromString('green'), 10, 15)
