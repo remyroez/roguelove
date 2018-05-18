@@ -3,8 +3,9 @@ local folderOfThisFile = (...) .. '.'
 
 return {
     ActorSystem = require(folderOfThisFile ..'ActorSystem'),
-    BehaviorSystem = require(folderOfThisFile ..'BehaviorSystem'),
     AssetSystem = require(folderOfThisFile ..'AssetSystem'),
+    AttributeSystem = require(folderOfThisFile ..'AttributeSystem'),
+    BehaviorSystem = require(folderOfThisFile ..'BehaviorSystem'),
     DisplaySystem = require(folderOfThisFile ..'DisplaySystem'),
     LightSystem = require(folderOfThisFile ..'LightSystem'),
     MapSystem = require(folderOfThisFile ..'MapSystem'),

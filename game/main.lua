@@ -81,6 +81,13 @@ function love.load()
         engine.eventManager:addListener(events.HitCheck.name, system, system.onHitCheck)
     end
 
+    -- attribute system
+    do
+        local system = systems.AttributeSystem(engine)
+        engine:addSystem(system)
+        engine.eventManager:addListener(events.NextTurn.name, system, system.nextTurn)
+    end
+
     -- map system
     do
         engine:addSystem(systems.MapSystem())
