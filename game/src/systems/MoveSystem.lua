@@ -92,7 +92,7 @@ function MoveSystem:onMove(event)
         -- hit with unknown
     else
         -- can't move
-        local statistic = other:get('Statistic')
+        local statistic = other:get('Attribute')
         if statistic then
             statistic:onCollision(event.entity)
         end
