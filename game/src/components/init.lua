@@ -13,6 +13,7 @@ return {
     Position = require(folderOfThisFile ..'Position'),
     Shadow = require(folderOfThisFile ..'Shadow'),
     Size = require(folderOfThisFile ..'Size'),
+    Statistic = require(folderOfThisFile ..'Statistic'),
     Tag = require(folderOfThisFile ..'Tag'),
     View = require(folderOfThisFile ..'View'),
 }

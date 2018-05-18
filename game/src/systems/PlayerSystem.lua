@@ -2,9 +2,7 @@
 local class = require 'middleclass'
 local lovetoys = require 'lovetoys.lovetoys'
 
-local Move = require 'events.Move'
-local HitCheck = require 'events.HitCheck'
-local NextTurn = require 'events.NextTurn'
+local events = require 'events'
 
 local PlayerSystem = class('PlayerSystem', lovetoys.System)
 
@@ -48,12 +46,8 @@ function PlayerSystem:keypressed(event)
         for index, entity in pairs(self.targets) do
             fire = true
             if check and hitCheck then
-                local event = HitCheck(
-                    entity.id,
-                    entity:get('Position'),
-                    entity:get('Size'),
-                    entity:get('Layer'),
-                    entity:get('Collider'),
+                local event = events.HitCheck(
+                    entity,
                     newPos[1],
                     newPos[2]
                 )
@@ -69,12 +63,8 @@ function PlayerSystem:keypressed(event)
                 actor:schedule(
                     function (entityActor)
                         self.eventManager:fireEvent(
-                            Move(
-                                entity.id,
-                                entity:get('Position'),
-                                entity:get('Size'),
-                                entity:get('Layer'),
-                                entity:get('Collider'),
+                            events.Move(
+                                entity,
                                 newPos[1],
                                 newPos[2],
                                 check
@@ -88,7 +78,7 @@ function PlayerSystem:keypressed(event)
         end
 
         if fired then
-            self.eventManager:fireEvent(NextTurn())
+            self.eventManager:fireEvent(events.NextTurn())
         end
     end
 end
