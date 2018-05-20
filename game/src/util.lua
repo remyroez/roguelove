@@ -99,4 +99,12 @@ function util.isZip(path)
     return util.fileExtension(path) == '.zip'
 end
 
+function util.gets(name, ...)
+    local components = {}
+    for _, entity in ipairs({...}) do
+        table.insert(components, entity:get(name))
+    end
+    return unpack(components)
+end
+
 return util

@@ -76,24 +76,34 @@ end
 
 function MoveSystem:onMove(event)
     local hit = false
+    local other = nil
 
     if event.check then
-        hit = self:onHitCheck(event)
+        hit, other = self:onHitCheck(event)
     end
 
-    if hit then
-        -- can't move
-    else
+    if not hit then
         event.position:translate(event.x, event.y)
         
         if self.eventManager then
             self.eventManager:fireEvent(Flush())
+        end
+    elseif not other then
+        -- hit with unknown
+    elseif not other:get('Attribute') then
+        -- no attribute
+    else
+        -- can't move
+        local attribute = event.entity:get('Attribute')
+        if attribute then
+            attribute:onCollisionTo(event.entity, other, 'move')
         end
     end
 end
 
 function MoveSystem:onHitCheck(event)
     local hit = false
+    local other = nil
 
     for index, entity in pairs(self.targets) do
         if event.id == entity.id then
@@ -103,19 +113,20 @@ function MoveSystem:onHitCheck(event)
             entity:get('Size'),
             entity:get('Layer'),
             entity:get('Collider'),
-            { x = event.position.x + event.x, y = event.position.y + event.y },
+            event:movedPosition(),
             event.size,
             event.layer,
             event.collider
         ) then
             hit = true
+            other = entity
             break
         end
     end
 
     event.result = hit
 
-    return hit
+    return hit, other
 end
 
 return MoveSystem

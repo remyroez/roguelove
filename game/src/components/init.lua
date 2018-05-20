@@ -3,6 +3,7 @@ local folderOfThisFile = (...) .. '.'
 
 return {
     Actor = require(folderOfThisFile ..'Actor'),
+    Attribute = require(folderOfThisFile ..'Attribute'),
     Behavior = require(folderOfThisFile ..'Behavior'),
     Collider = require(folderOfThisFile ..'Collider'),
     Displayable = require(folderOfThisFile ..'Displayable'),

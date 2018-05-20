@@ -1,0 +1,17 @@
+[
+    {
+        "id": "attribute_core_default",
+        "type": "attribute",
+        "properties": {
+            "maxHp": 100,
+            "triggers": [
+                {
+                    "target": "maxHp",
+                    "condition": "less",
+                    "value": 0,
+                    "action": "die"
+                }
+            ]
+        }
+    }
+]
