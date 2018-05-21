@@ -144,6 +144,7 @@ function love.load()
         local system = systems.DebugSystem(engine)
         engine:addSystem(system, 'update')
         engine:addSystem(system, 'draw')
+        engine:stopSystem(system.class.name)
         debugSystem = system
     end
 
@@ -257,19 +258,21 @@ function love.quit()
 end
 
 function love.keypressed(key, scancode, isrepeat)
-    if debugSystem:keypressed(key, scancode, isrepeat) then
+    if debugSystem.active and debugSystem:keypressed(key, scancode, isrepeat) then
         -- debug
     elseif key == 'escape' then
         love.event.quit()
     elseif key == 'f5' then
         love.event.quit('restart')
+    elseif key == 'f12' then
+        debugSystem.active = not debugSystem.active
     else
         engine.eventManager:fireEvent(events.KeyPressed(key, scancode, isrepeat))
     end
 end
 
 function love.textinput(...)
-    if debugSystem:textinput(...) then
+    if debugSystem.active and debugSystem:textinput(...) then
         -- debug
     else
         --engine.eventManager:fireEvent(events.TextInput(...))
@@ -277,7 +280,7 @@ function love.textinput(...)
 end
 
 function love.keyreleased(...)
-    if debugSystem:keyreleased(...) then
+    if debugSystem.active and debugSystem:keyreleased(...) then
         -- debug
     else
         --engine.eventManager:fireEvent(events.KeyReleased(...))
@@ -285,7 +288,7 @@ function love.keyreleased(...)
 end
 
 function love.mousemoved(...)
-    if debugSystem:mousemoved(...) then
+    if debugSystem.active and debugSystem:mousemoved(...) then
         -- debug
     else
         --engine.eventManager:fireEvent(events.MouseMoved(...))
@@ -293,7 +296,7 @@ function love.mousemoved(...)
 end
 
 function love.mousepressed(...)
-    if debugSystem:mousepressed(...) then
+    if debugSystem.active and debugSystem:mousepressed(...) then
         -- debug
     else
         --engine.eventManager:fireEvent(events.MousePressed(...))
@@ -301,7 +304,7 @@ function love.mousepressed(...)
 end
 
 function love.mousereleased(...)
-    if debugSystem:mousereleased(...) then
+    if debugSystem.active and debugSystem:mousereleased(...) then
         -- debug
     else
         --engine.eventManager:fireEvent(events.MouseReleased(...))
@@ -309,7 +312,7 @@ function love.mousereleased(...)
 end
 
 function love.wheelmoved(...)
-    if debugSystem:wheelmoved(...) then
+    if debugSystem.active and debugSystem:wheelmoved(...) then
         -- debug
     else
         --engine.eventManager:fireEvent(events.WheelMoved(...))

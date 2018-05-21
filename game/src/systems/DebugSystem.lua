@@ -5,6 +5,7 @@ local class = require 'middleclass'
 local lovetoys = require 'lovetoys.lovetoys'
 
 require 'imgui'
+local debugui = require 'debugui'
 
 local System = class('DebugSystem', lovetoys.System)
 
@@ -12,6 +13,21 @@ function System:initialize(engine)
     lovetoys.System.initialize(self)
     self.engine = engine
     self.showTestWindow = false
+    self.mainMenuBar = debugui.MainMenuBar {
+        children = {
+            debugui.Menu {
+                label = 'Menu',
+                children = {
+                    debugui.MenuItem {
+                        label = 'FooBar',
+                        children = function ()
+                            print('FooBar!')
+                        end
+                    }
+                }
+            }
+        }
+    }
 end
 
 function System:requires()
@@ -24,13 +40,7 @@ end
 
 function System:draw()
     
-    if imgui.BeginMainMenuBar() then
-        if imgui.BeginMenu("File") then
-            imgui.MenuItem("Test")
-            imgui.EndMenu()
-        end
-        imgui.EndMainMenuBar()
-    end
+    self.mainMenuBar()
 
     imgui.Text("Hello, world!")
 
