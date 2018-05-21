@@ -21,6 +21,7 @@ function love.conf(t)
 		--"middleclass",
 		"lovetoys",
 		"ljsonschema",
-		"semver"
+		"semver",
+		"love-imgui"
 	}
 end
