@@ -13,6 +13,8 @@ function System:initialize(engine)
     lovetoys.System.initialize(self)
     self.engine = engine
     self.showTestWindow = false
+    self.showEntityWindow = true
+    self.selected = 1
     self.mainMenuBar = debugui.MainMenuBar {
         children = {
             debugui.Menu {
@@ -51,6 +53,40 @@ function System:draw()
     if self.showTestWindow then
         self.showTestWindow = imgui.ShowMetricsWindow(true)
     end
+
+    self.showEntityWindow = imgui.Begin("Entities", self.showEntityWindow, { "ImGuiWindowFlags_AlwaysAutoResize" })
+    
+    local entities = {}
+    for index, entity in pairs(self.engine.entities) do
+        table.insert(entities, entity.id --[[.. (entity.name and (': ' .. entity.name) or '')]])
+    end
+    
+    local select
+    select, self.selected = imgui.ListBox('list', self.selected, entities, #entities)
+
+    if select then
+        print(self.selected)
+    end
+
+    do
+        local entity = self.engine.entities[entities[self.selected]]
+        imgui.Begin('Entity ' .. entity.id)
+        for name, component in pairs(entity.components) do
+            imgui.BeginGroup()
+            imgui.Text(name)
+            for key, value in pairs(component) do
+                imgui.Text(key .. ": " .. tostring(value))
+            end
+            imgui.EndGroup()
+        end
+        imgui.End()
+    end
+
+    if imgui.IsMouseDoubleClicked(0) then
+        print('double click')
+    end
+
+    imgui.End()
 
     imgui.Render()
 end

@@ -150,7 +150,7 @@ function love.load()
 
     -- player
     do
-        local entity = lovetoys.Entity()
+        local entity = lovetoys.Entity(nil, 'player')
 
         entity:add(components.Player())
         entity:add(components.Tag { 'player' } )
