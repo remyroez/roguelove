@@ -6,6 +6,7 @@ return {
     AssetSystem = require(folderOfThisFile ..'AssetSystem'),
     AttributeSystem = require(folderOfThisFile ..'AttributeSystem'),
     BehaviorSystem = require(folderOfThisFile ..'BehaviorSystem'),
+    DebugSystem = require(folderOfThisFile ..'DebugSystem'),
     DisplaySystem = require(folderOfThisFile ..'DisplaySystem'),
     LightSystem = require(folderOfThisFile ..'LightSystem'),
     MapSystem = require(folderOfThisFile ..'MapSystem'),
