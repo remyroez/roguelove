@@ -68,16 +68,21 @@ function System:draw()
         print(self.selected)
     end
 
-    do
-        local entity = self.engine.entities[entities[self.selected]]
+    local entity = self.engine.entities[entities[self.selected]]
+    if entity then
         imgui.Begin('Entity ' .. entity.id)
         for name, component in pairs(entity.components) do
-            imgui.BeginGroup()
-            imgui.Text(name)
-            for key, value in pairs(component) do
-                imgui.Text(key .. ": " .. tostring(value))
+            if imgui.CollapsingHeader(name) then
+                for key, value in pairs(component) do
+                    if key == 'class' then
+                        -- skip
+                    elseif key == 'dirty' then
+                        -- skip
+                    else
+                        imgui.Text(key .. ": " .. tostring(value))
+                    end
+                end
             end
-            imgui.EndGroup()
         end
         imgui.End()
     end
