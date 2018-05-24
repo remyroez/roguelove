@@ -13,7 +13,8 @@ function System:initialize(engine)
     lovetoys.System.initialize(self)
     self.engine = engine
     self.showTestWindow = false
-    self.showEntityWindow = true
+    self.showEntitiesWindow = true
+    self.showEntityWindow = false
     self.selected = 1
     self.mainMenuBar = debugui.MainMenuBar {
         children = {
@@ -54,8 +55,16 @@ function System:draw()
         self.showTestWindow = imgui.ShowMetricsWindow(true)
     end
 
-    self.showEntityWindow = imgui.Begin("Entities", self.showEntityWindow, { "ImGuiWindowFlags_AlwaysAutoResize" })
-    
+    if self.showEntitiesWindow then
+        self:drawEntitiesWindow()
+    end
+
+    imgui.Render()
+end
+
+function System:drawEntitiesWindow()
+    self.showEntitiesWindow = imgui.Begin("Entities", true, { "ImGuiWindowFlags_AlwaysAutoResize" })
+
     local entities = {}
     for index, entity in pairs(self.engine.entities) do
         table.insert(entities, entity.id --[[.. (entity.name and (': ' .. entity.name) or '')]])
@@ -65,35 +74,46 @@ function System:draw()
     select, self.selected = imgui.ListBox('list', self.selected, entities, #entities)
 
     if select then
-        print(self.selected)
+        self.showEntityWindow = true
     end
 
     local entity = self.engine.entities[entities[self.selected]]
     if entity then
-        imgui.Begin('Entity ' .. entity.id)
-        for name, component in pairs(entity.components) do
-            if imgui.CollapsingHeader(name) then
-                for key, value in pairs(component) do
-                    if key == 'class' then
-                        -- skip
-                    elseif key == 'dirty' then
-                        -- skip
-                    else
-                        imgui.Text(key .. ": " .. tostring(value))
-                    end
-                end
-            end
-        end
-        imgui.End()
-    end
-
-    if imgui.IsMouseDoubleClicked(0) then
-        print('double click')
+        self:drawEntityWindow(entity)
     end
 
     imgui.End()
+end
 
-    imgui.Render()
+function System:drawEntityWindow(entity)
+    self.showEntityWindow = imgui.Begin('Entity ' .. entity.id, true, {'ImGuiWindowFlags_NoSavedSettings'})
+
+    for name, component in pairs(entity.components) do
+        self:drawObject(name, component)
+        imgui.Spacing()
+    end
+
+    imgui.End()
+end
+
+function System:drawObject(name, object)
+    imgui.PushID(name)
+    if imgui.CollapsingHeader(name) then
+        imgui.Indent()
+        for key, value in pairs(object) do
+            if key == 'class' then
+                -- skip
+            elseif key == 'dirty' then
+                -- skip
+            elseif type(value) == 'table' then
+                self:drawObject(key, value)
+            else
+                imgui.Text(key .. ": " .. tostring(value))
+            end
+        end
+        imgui.Unindent()
+    end
+    imgui.PopID()
 end
 
 function System:quit()
