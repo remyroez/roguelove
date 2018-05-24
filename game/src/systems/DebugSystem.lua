@@ -22,9 +22,9 @@ function System:initialize(engine)
                 label = 'Menu',
                 children = {
                     debugui.MenuItem {
-                        label = 'FooBar',
+                        label = 'Entities',
                         children = function ()
-                            print('FooBar!')
+                            self.showEntitiesWindow = not self.showEntitiesWindow
                         end
                     }
                 }
@@ -56,60 +56,95 @@ function System:draw()
     end
 
     if self.showEntitiesWindow then
-        self:drawEntitiesWindow()
+        self.showEntitiesWindow = self:drawEntitiesWindow(self.showEntitiesWindow)
     end
 
     imgui.Render()
 end
 
-function System:drawEntitiesWindow()
-    self.showEntitiesWindow = imgui.Begin("Entities", true, { "ImGuiWindowFlags_AlwaysAutoResize" })
+function System:drawEntitiesWindow(open)
+    local began, opened = imgui.Begin("Entities", open, { "AlwaysAutoResize" })
 
-    local entities = {}
-    for index, entity in pairs(self.engine.entities) do
-        table.insert(entities, entity.id --[[.. (entity.name and (': ' .. entity.name) or '')]])
+    if not began then
+        -- collapsed
+    elseif not opened then
+        -- closed
+    else
+        local entities = {}
+        for index, entity in pairs(self.engine.entities) do
+            table.insert(entities, entity.id --[[.. (entity.name and (': ' .. entity.name) or '')]])
+        end
+        
+        local select
+        select, self.selected = imgui.ListBox('list', self.selected, entities, #entities)
+    
+        if select then
+            self.showEntityWindow = true
+        end
+    
+        local entity = self.engine.entities[entities[self.selected]]
+        if not self.showEntityWindow then
+            -- dont show
+        elseif not entity then
+            -- no entity
+        else
+            self.showEntityWindow = self:drawEntityWindow(self.showEntityWindow, entity, false)
+        end
     end
     
-    local select
-    select, self.selected = imgui.ListBox('list', self.selected, entities, #entities)
+    imgui.End()
 
-    if select then
-        self.showEntityWindow = true
-    end
+    return opened
+end
 
-    local entity = self.engine.entities[entities[self.selected]]
-    if entity then
-        self:drawEntityWindow(entity)
+function System:drawEntityWindow(open, entity, hide_private)
+    local began, opened = imgui.Begin('Entity ' .. (entity.name and ("[" .. entity.name .. "]") or entity.id), open, {'NoSavedSettings'})
+
+    if not began then
+        -- collapsed
+    elseif not opened then
+        -- closed
+    else
+        for name, component in pairs(entity.components) do
+            self:drawObject(name, component, hide_private)
+            imgui.Spacing()
+        end
     end
 
     imgui.End()
+
+    return opened
 end
 
-function System:drawEntityWindow(entity)
-    self.showEntityWindow = imgui.Begin('Entity ' .. entity.id, true, {'ImGuiWindowFlags_NoSavedSettings'})
-
-    for name, component in pairs(entity.components) do
-        self:drawObject(name, component)
-        imgui.Spacing()
-    end
-
-    imgui.End()
-end
-
-function System:drawObject(name, object)
+function System:drawObject(name, object, hide_private)
     imgui.PushID(name)
     if imgui.CollapsingHeader(name) then
         imgui.Indent()
+        local has_member = false
         for key, value in pairs(object) do
-            if key == 'class' then
+            if hide_private and string.sub(key, 1, 1) == '_' then
+                -- hide private
+            elseif key == 'class' then
                 -- skip
             elseif key == 'dirty' then
                 -- skip
             elseif type(value) == 'table' then
-                self:drawObject(key, value)
-            else
+                self:drawObject(key, value, hide_private)
+                has_member = true
+            elseif type(value) == 'string' then
+                local change, input = imgui.InputText(key, value, 0xFF)
+                if change then object[key] = input end
+                has_member = true
+            elseif type(value) == 'function' then
                 imgui.Text(key .. ": " .. tostring(value))
+                has_member = true
+            else
+                imgui.Value(key, value)
+                has_member = true
             end
+        end
+        if not has_member then
+            imgui.Text('empty')
         end
         imgui.Unindent()
     end
