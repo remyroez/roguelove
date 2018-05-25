@@ -32,6 +32,7 @@ function System:initialize(engine)
             }
         }
     }
+    print('imgui', imgui.GetVersion())
 end
 
 function System:requires()
@@ -57,61 +58,58 @@ function System:draw()
     end
 
     if self.showEntitiesWindow then
-        self.showEntitiesWindow = self:drawEntitiesWindow(self.showEntitiesWindow)
+        self.showEntitiesWindow = self:drawPropertyWindow(self.showEntitiesWindow)
     end
 
     imgui.Render()
 end
 
-function System:drawEntitiesWindow(open)
-    local began, opened = imgui.Begin("Entities", open, { "AlwaysAutoResize" })
+function System:drawPropertyWindow(open)
+    local began, opened = imgui.Begin("Entity", open)
 
     if not began then
         -- collapsed
     elseif not opened then
         -- closed
     else
-        local entities = {}
-        for index, entity in pairs(self.engine.entities) do
-            table.insert(entities, entity.id --[[.. (entity.name and (': ' .. entity.name) or '')]])
-        end
+        local indices = {}
         
-        local select
-        select, self.selected = imgui.ListBox('list', self.selected, entities, #entities)
-    
-        if select then
-            self.showEntityWindow = true
+        imgui.BeginChild('entities', 150, 0, true)
+        do
+            local i = 1
+            for index, entity in pairs(self.engine.entities) do
+                table.insert(indices, entity.id)
+                if imgui.Selectable(
+                    entity.id .. (entity.name and (': ' .. entity.name) or ''),
+                    self.selected == i
+                ) then
+                    self.selected = i
+                end
+                i = i + 1
+            end
         end
-    
-        local entity = self.engine.entities[entities[self.selected]]
-        if not self.showEntityWindow then
-            -- dont show
-        elseif not entity then
-            -- no entity
-        else
-            self.showEntityWindow = self:drawEntityWindow(self.showEntityWindow, entity, true)
+        imgui.EndChild()
+
+        imgui.SameLine()
+
+        imgui.BeginGroup()
+        do
+            local show_private = true
+            local entity = self.engine.entities[indices[self.selected]]
+            imgui.Text('Entity ' .. entity.id .. (entity.name and (': ' .. entity.name) or ''))
+            imgui.Separator()
+            imgui.BeginChild('property')
+            do
+                for name, component in pairs(entity.components) do
+                    self:drawComponent(name, component, show_private)
+                    imgui.Spacing()
+                end
+            end
+            imgui.EndChild()
         end
+        imgui.EndGroup()
     end
     
-    imgui.End()
-
-    return opened
-end
-
-function System:drawEntityWindow(open, entity, show_private)
-    local began, opened = imgui.Begin('Entity ' .. (entity.name and ("[" .. entity.name .. "]") or entity.id), open, {'NoSavedSettings'})
-
-    if not began then
-        -- collapsed
-    elseif not opened then
-        -- closed
-    else
-        for name, component in pairs(entity.components) do
-            self:drawComponent(name, component, show_private)
-            imgui.Spacing()
-        end
-    end
-
     imgui.End()
 
     return opened
