@@ -23,6 +23,7 @@ function System:initialize(engine)
                 children = {
                     debugui.MenuItem {
                         label = 'Entities',
+                        selected = true,
                         children = function ()
                             self.showEntitiesWindow = not self.showEntitiesWindow
                         end
@@ -88,7 +89,7 @@ function System:drawEntitiesWindow(open)
         elseif not entity then
             -- no entity
         else
-            self.showEntityWindow = self:drawEntityWindow(self.showEntityWindow, entity, false)
+            self.showEntityWindow = self:drawEntityWindow(self.showEntityWindow, entity, true)
         end
     end
     
@@ -97,7 +98,7 @@ function System:drawEntitiesWindow(open)
     return opened
 end
 
-function System:drawEntityWindow(open, entity, hide_private)
+function System:drawEntityWindow(open, entity, show_private)
     local began, opened = imgui.Begin('Entity ' .. (entity.name and ("[" .. entity.name .. "]") or entity.id), open, {'NoSavedSettings'})
 
     if not began then
@@ -106,7 +107,7 @@ function System:drawEntityWindow(open, entity, hide_private)
         -- closed
     else
         for name, component in pairs(entity.components) do
-            self:drawObject(name, component, hide_private)
+            self:drawComponent(name, component, show_private)
             imgui.Spacing()
         end
     end
@@ -116,39 +117,84 @@ function System:drawEntityWindow(open, entity, hide_private)
     return opened
 end
 
-function System:drawObject(name, object, hide_private)
+function System:drawComponent(name, component, show_private)
     imgui.PushID(name)
+
     if imgui.CollapsingHeader(name) then
-        imgui.Indent()
-        local has_member = false
-        for key, value in pairs(object) do
-            if hide_private and string.sub(key, 1, 1) == '_' then
-                -- hide private
-            elseif key == 'class' then
-                -- skip
-            elseif key == 'dirty' then
-                -- skip
-            elseif type(value) == 'table' then
-                self:drawObject(key, value, hide_private)
-                has_member = true
-            elseif type(value) == 'string' then
-                local change, input = imgui.InputText(key, value, 0xFF)
-                if change then object[key] = input end
-                has_member = true
-            elseif type(value) == 'function' then
-                imgui.Text(key .. ": " .. tostring(value))
-                has_member = true
-            else
-                imgui.Value(key, value)
-                has_member = true
-            end
+        local has_value = false
+
+        for key, value in pairs(component) do
+            has_value = self:drawMember(component, key, value, show_private) or has_value
         end
-        if not has_member then
-            imgui.Text('empty')
+
+        -- no value
+        if not has_value then
+            imgui.TextDisabled('empty')
         end
-        imgui.Unindent()
     end
+
     imgui.PopID()
+end
+
+function System:drawMember(object, name, member, show_private)
+    local has_member = false
+
+    local obj_type = type(member)
+
+    if not show_private and string.sub(name, 1, 1) == '_' then
+        -- hide private
+    elseif string.sub(name, 1, 2) == '__' then
+        -- hide meta
+    elseif name == 'class' then
+        -- skip
+    elseif name == 'dirty' then
+        -- skip
+    elseif obj_type == 'table' then
+        -- table
+        imgui.PushID(name)
+        
+        if imgui.TreeNodeEx(name, { "AllowOverlapMode"}) then
+            local has_value = false
+
+            for key, value in pairs(member) do
+                has_value = self:drawMember(member, key, value, show_private)
+            end
+
+            -- no value
+            if not has_value then
+                imgui.TextDisabled('empty')
+            end
+
+            imgui.TreePop()
+        end
+
+        imgui.PopID()
+
+        has_member = true
+    elseif obj_type == 'string' then
+        -- string
+        imgui.Bullet()
+        local change, result = imgui.InputText(name, member, 0xFF)
+        if change then object[name] = result end
+        has_member = true
+    elseif obj_type == 'boolean' then
+        -- boolean
+        imgui.Bullet()
+        local change, result = imgui.Checkbox(name, member, 0xFF)
+        if change then object[name] = result end
+        has_member = true
+    elseif obj_type == 'function' then
+        -- function
+        imgui.BulletText(name .. ": " .. tostring(member))
+        has_member = true
+    else
+        -- value
+        imgui.Bullet()
+        imgui.Value(name, member)
+        has_member = true
+    end
+
+    return has_member
 end
 
 function System:quit()
