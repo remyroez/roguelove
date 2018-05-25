@@ -73,16 +73,16 @@ function System:drawPropertyWindow(open)
         -- closed
     else
         local indices = {}
+        local displayNames = {}
         
-        imgui.BeginChild('entities', 150, 0, true)
+        imgui.BeginChild('entities', 150, 0, true, { 'HorizontalScrollbar' })
         do
             local i = 1
             for index, entity in pairs(self.engine.entities) do
+                local displayName = entity.id .. (entity.name and (': ' .. entity.name) or '')
                 table.insert(indices, entity.id)
-                if imgui.Selectable(
-                    entity.id .. (entity.name and (': ' .. entity.name) or ''),
-                    self.selected == i
-                ) then
+                table.insert(displayNames, displayName)
+                if imgui.Selectable(displayName, self.selected == i) then
                     self.selected = i
                 end
                 i = i + 1
@@ -96,7 +96,7 @@ function System:drawPropertyWindow(open)
         do
             local show_private = true
             local entity = self.engine.entities[indices[self.selected]]
-            imgui.Text('Entity ' .. entity.id .. (entity.name and (': ' .. entity.name) or ''))
+            imgui.Text('Entity ' .. displayNames[self.selected])
             imgui.Separator()
             imgui.BeginChild('property')
             do
