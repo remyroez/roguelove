@@ -101,7 +101,9 @@ function System:drawPropertyWindow(open)
             imgui.BeginChild('property')
             do
                 for name, component in pairs(entity.components) do
-                    self:drawComponent(name, component, show_private)
+                    if not self:drawComponent(entity, name, component, show_private) then
+                        break
+                    end
                     imgui.Spacing()
                 end
             end
@@ -115,10 +117,18 @@ function System:drawPropertyWindow(open)
     return opened
 end
 
-function System:drawComponent(name, component, show_private)
+function System:drawComponent(entity, name, component, show_private)
     imgui.PushID(name)
 
-    if imgui.CollapsingHeader(name) then
+    local began, opened = imgui.CollapsingHeader(name, true, { 'DefaultOpen' })
+
+    if not opened then
+        -- close
+        entity:remove(name)
+        print(name, entity:get(name))
+    elseif not began then
+        -- unCollapse
+    else
         local has_value = false
 
         for key, value in pairs(component) do
@@ -132,6 +142,8 @@ function System:drawComponent(name, component, show_private)
     end
 
     imgui.PopID()
+
+    return opened
 end
 
 function System:drawMember(object, name, member, show_private)

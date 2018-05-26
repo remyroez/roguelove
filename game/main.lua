@@ -10,6 +10,9 @@ lovetoys.initialize {
     global = false,
     middleclassPath = 'middleclass'
 }
+ComponentAdded = lovetoys.ComponentAdded
+ComponentRemoved = lovetoys.ComponentRemoved
+
 local rot = require 'rot'
 
 local components = require 'components'
