@@ -10,6 +10,9 @@ lovetoys.initialize {
     global = false,
     middleclassPath = 'middleclass'
 }
+ComponentAdded = lovetoys.ComponentAdded
+ComponentRemoved = lovetoys.ComponentRemoved
+
 local rot = require 'rot'
 
 local components = require 'components'
@@ -22,6 +25,8 @@ local Terminal = require 'core.Terminal'
 local engine = nil
 
 local context = {}
+
+local debugSystem
 
 function love.load()
     love.keyboard.setKeyRepeat(true)
@@ -137,9 +142,18 @@ function love.load()
         engine:addSystem(system, 'draw')
     end
 
+    -- debug system
+    do
+        local system = systems.DebugSystem(engine)
+        engine:addSystem(system, 'update')
+        engine:addSystem(system, 'draw')
+        engine:stopSystem(system.class.name)
+        debugSystem = system
+    end
+
     -- player
     do
-        local entity = lovetoys.Entity()
+        local entity = lovetoys.Entity(nil, 'player')
 
         entity:add(components.Player())
         entity:add(components.Tag { 'player' } )
@@ -242,12 +256,68 @@ function love.draw()
     engine:draw()
 end
 
+function love.quit()
+    debugSystem:quit()
+end
+
 function love.keypressed(key, scancode, isrepeat)
-    if key == 'escape' then
+    if debugSystem.active and debugSystem:keypressed(key, scancode, isrepeat) then
+        -- debug
+    elseif key == 'escape' then
         love.event.quit()
     elseif key == 'f5' then
         love.event.quit('restart')
+    elseif key == 'f12' then
+        debugSystem.active = not debugSystem.active
     else
         engine.eventManager:fireEvent(events.KeyPressed(key, scancode, isrepeat))
+    end
+end
+
+function love.textinput(...)
+    if debugSystem.active and debugSystem:textinput(...) then
+        -- debug
+    else
+        --engine.eventManager:fireEvent(events.TextInput(...))
+    end
+end
+
+function love.keyreleased(...)
+    if debugSystem.active and debugSystem:keyreleased(...) then
+        -- debug
+    else
+        --engine.eventManager:fireEvent(events.KeyReleased(...))
+    end
+end
+
+function love.mousemoved(...)
+    if debugSystem.active and debugSystem:mousemoved(...) then
+        -- debug
+    else
+        --engine.eventManager:fireEvent(events.MouseMoved(...))
+    end
+end
+
+function love.mousepressed(...)
+    if debugSystem.active and debugSystem:mousepressed(...) then
+        -- debug
+    else
+        --engine.eventManager:fireEvent(events.MousePressed(...))
+    end
+end
+
+function love.mousereleased(...)
+    if debugSystem.active and debugSystem:mousereleased(...) then
+        -- debug
+    else
+        --engine.eventManager:fireEvent(events.MouseReleased(...))
+    end
+end
+
+function love.wheelmoved(...)
+    if debugSystem.active and debugSystem:wheelmoved(...) then
+        -- debug
+    else
+        --engine.eventManager:fireEvent(events.WheelMoved(...))
     end
 end
